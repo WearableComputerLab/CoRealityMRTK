@@ -1,4 +1,4 @@
-# CoRealityMRTK
+# Cooperative Reality
 
 ## Requirements
 
