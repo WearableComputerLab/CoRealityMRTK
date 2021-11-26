@@ -11,16 +11,17 @@ using Photon.Pun;
 public class NetworkInterfaceBindings : MonoBehaviour
 {
     [SerializeField]
-    TextMeshProUGUI _userCountText;
+    TextMeshProUGUI _playerCountText;
     [SerializeField]
     TextMeshProUGUI _connStatusText;
-    [SerializeField]
-    TextMeshProUGUI _roomNameText;
     [SerializeField]
     Button _connectionButton;
 
     void Start()
     {
+        _connStatusText.text = "Disconnected";
+        _connStatusText.color = Color.red;
+
         if (NetworkModule.Instance)
         {
             NetworkModule.OnConnectedEvent.AddListener(() =>
@@ -33,17 +34,13 @@ public class NetworkInterfaceBindings : MonoBehaviour
                 _connStatusText.text = "Disconnected";
                 _connStatusText.color = Color.red;
             });
-            NetworkModule.OnJoinedRoomEvent.AddListener(() =>
-            {
-                _roomNameText.text = PhotonNetwork.CurrentRoom.Name;
-            });
             NetworkModule.OnPlayerJoinedRoomEvent.AddListener(player =>
             {
-
+                _playerCountText.text = "Players = " + PhotonNetwork.PlayerList.Length;
             });
             NetworkModule.OnPlayerLeftRoomEvent.AddListener(player =>
             {
-
+                _playerCountText.text = "Players = " + PhotonNetwork.PlayerList.Length;
             });
         }
     }

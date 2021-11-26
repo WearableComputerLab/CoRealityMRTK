@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,7 +24,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     protected string _region;
 
     [SerializeField, Tooltip("The name of the room to connect too")]
-    protected string _roomName;
+    protected string _roomName = "default";
 
     //--------------------------------
 
@@ -34,10 +35,6 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     [SerializeField]
     protected UnityEvent _onDisconnected;
     public static UnityEvent OnDisconnectedEvent { get => Instance._onDisconnected; }
-
-    [SerializeField]
-    protected UnityEvent _onJoinedRoom;
-    public static UnityEvent OnJoinedRoomEvent { get => Instance._onJoinedRoom; }
 
     [SerializeField]
     protected PlayerEvent _onPlayerJoinedRoom;
@@ -60,7 +57,6 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     {
         get => Instance._networkOriginObject.transform;
     }
-
 
     void Awake()
     {
@@ -119,7 +115,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
 
     public void OnJoinedRoom()
     {
-        _onJoinedRoom.Invoke();
+        
     }
 
     public void OnJoinRoomFailed(short returnCode, string message)
@@ -199,6 +195,6 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
 
 //SECURITY FIRST
 
-[System.Serializable]
+[Serializable]
 public class PlayerEvent : UnityEvent<Player> { }
 
