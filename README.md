@@ -17,3 +17,7 @@ Download and import the [latest version of vuforia for unity](https://developer.
 Photon 2
 
 Download and add the [PUN 2 - Free asset from the asset store](https://assetstore.unity.com/packages/tools/network/pun-2-free-119922)
+
+## Setup
+
+[MRTK + Vuforia Tutorial](https://library.vuforia.com/articles/Solution/Working-with-the-HoloLens-sample-in-Unity.html)

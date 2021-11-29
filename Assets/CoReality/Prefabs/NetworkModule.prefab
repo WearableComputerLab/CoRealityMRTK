@@ -41,18 +41,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d74a1aed907cd6f4391c6cb24ef644f9, type: 3}
-  m_Name: 
+  m_Name: ac95f4ec-812f-4c79-8c09-3f0ea2f08581
   m_EditorClassIdentifier: 
   _autoConnect: 1
-  _apiKey: 
+  _appID: 4128acfc-094a-45b7-b016-a27c352de108
+  _region: AU
   _roomName: Room
   _onConnected:
     m_PersistentCalls:
       m_Calls: []
   _onDisconnected:
-    m_PersistentCalls:
-      m_Calls: []
-  _onJoinedRoom:
     m_PersistentCalls:
       m_Calls: []
   _onPlayerJoinedRoom:

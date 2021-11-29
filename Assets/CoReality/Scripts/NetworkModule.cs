@@ -17,14 +17,24 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     [SerializeField, Tooltip("Automatically connect to the Photon network, if false you must call Connect() yourself.")]
     protected bool _autoConnect = true;
 
-    [SerializeField, Tooltip("Your Photon cloud app id")]
-    protected string _appID;
+    [SerializeField, Tooltip("Your Photon cloud app id.")]
+    protected string _appID = "";
 
-    [SerializeField, Tooltip("The photon cloud region")]
+    [SerializeField, Tooltip("The photon cloud region to use.")]
     protected string _region;
 
-    [SerializeField, Tooltip("The name of the room to connect too")]
+    [SerializeField, Tooltip("The name of the room to connect too.")]
     protected string _roomName = "default";
+
+    [SerializeField, Tooltip("The vuforia target. This marker is what is used to align each user's networked space.")]
+    protected DefaultTrackableEventHandler _vuforiaTarget;
+
+    [SerializeField, Tooltip("An array of objects that are automatically attached to the networked origin transform")]
+    /// <summary>
+    /// Setting these objects will ensure they follower the networked origin 
+    /// (aka. the vuforia target's position in worldspace)
+    /// </summary>
+    protected GameObject[] _attachedObjects;
 
     //--------------------------------
 
@@ -58,20 +68,40 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
         get => Instance._networkOriginObject.transform;
     }
 
+    private bool _vuforiaTargetFound = false;
+
     void Awake()
     {
         Instance = this;
         //Ensure this is target for photon callbacks
         PhotonNetwork.AddCallbackTarget(this);
-
         //Create the Network origin object
         _networkOriginObject = new GameObject("__ORIGIN__");
+        //Attach objects
+        foreach (GameObject go in _attachedObjects)
+            go.transform.SetParent(NetworkOrigin);
     }
 
     void Start()
     {
         if (_autoConnect)
             Connect();
+
+        //Add vuforia target behavoirs
+        if (_vuforiaTarget)
+        {
+            _vuforiaTarget.OnTargetFound.AddListener(() => _vuforiaTargetFound = true);
+            _vuforiaTarget.OnTargetLost.AddListener(() => _vuforiaTargetFound = false);
+        }
+    }
+
+    void Update()
+    {
+        if (_vuforiaTargetFound)
+        {
+            _networkOriginObject.transform.position = _vuforiaTarget.transform.position;
+            _networkOriginObject.transform.rotation = _vuforiaTarget.transform.rotation;
+        }
     }
 
     public static void Connect()
@@ -115,7 +145,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
 
     public void OnJoinedRoom()
     {
-        
+
     }
 
     public void OnJoinRoomFailed(short returnCode, string message)
@@ -140,6 +170,19 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     public void OnConnectedToMaster()
     {
         _onConnected.Invoke();
+        //Join the room
+        PhotonNetwork.JoinOrCreateRoom(
+            _roomName,
+            new RoomOptions
+            {
+                IsOpen = true,
+                IsVisible = true,
+                MaxPlayers = 10,
+                PublishUserId = true,
+                CleanupCacheOnLeave = true
+            },
+            TypedLobby.Default
+        );
     }
 
     public void OnDisconnected(DisconnectCause cause)
