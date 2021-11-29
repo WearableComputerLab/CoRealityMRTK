@@ -18,6 +18,24 @@ Photon 2
 
 Download and add the [PUN 2 - Free asset from the asset store](https://assetstore.unity.com/packages/tools/network/pun-2-free-119922)
 
-## Setup
+# Setup
+
+### Install MRTK + Vuforia + Photon
 
 [MRTK + Vuforia Tutorial](https://library.vuforia.com/articles/Solution/Working-with-the-HoloLens-sample-in-Unity.html)
+
+
+## Setting up HoloAvatar rigged hands
+
+TBD
+
+
+## Modules
+
+### Network Module
+
+Module for connecting / disconnecting from the photon server.
+
+### Avatar Module
+
+Module for creating user avatars and syncronizing them between all users.
