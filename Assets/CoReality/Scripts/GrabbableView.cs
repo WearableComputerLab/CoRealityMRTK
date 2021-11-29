@@ -5,7 +5,7 @@ using Photon.Realtime;
 using Photon.Pun;
 using Microsoft.MixedReality.Toolkit.Input;
 
-[RequireComponent(typeof(GrabbableView), typeof(NearInteractionGrabbable))]
+[RequireComponent(typeof(GrabbableView), typeof(NearInteractionGrabbable), typeof(PhotonView))]
 /// <summary>
 /// A basic example of a grabbable photon view for MRTK
 /// </summary>

@@ -14,6 +14,8 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
 {
     public static NetworkModule Instance;
 
+    //--------------------------------
+
     [SerializeField, Tooltip("Automatically connect to the Photon network, if false you must call Connect() yourself.")]
     protected bool _autoConnect = true;
 
@@ -27,6 +29,11 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     protected string _roomName = "default";
 
     [SerializeField, Tooltip("The vuforia target. This marker is what is used to align each user's networked space.")]
+    /// <summary>
+    /// If no vuforia target is supplied the default position of the origin will be world zero
+    /// and all users will be aligned around their world zero (the spatial head position the
+    /// application was launched from).
+    /// </summary>
     protected DefaultTrackableEventHandler _vuforiaTarget;
 
     [SerializeField, Tooltip("An array of objects that are automatically attached to the networked origin transform")]
@@ -177,7 +184,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
             {
                 IsOpen = true,
                 IsVisible = true,
-                MaxPlayers = 10,
+                MaxPlayers = 0,
                 PublishUserId = true,
                 CleanupCacheOnLeave = true
             },
