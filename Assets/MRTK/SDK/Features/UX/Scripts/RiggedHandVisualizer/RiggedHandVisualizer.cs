@@ -465,10 +465,6 @@ namespace Microsoft.MixedReality.Toolkit.Input
                     {
                         handRenderer.sharedMaterial.SetFloat(pinchStrengthMaterialProperty, pinchStrength);
                     }
-                    else
-                    {
-                        throw new Exception(String.Format("The property {0} for reacting to pinch strength was not found please provide a valid material property name", pinchStrengthMaterialProperty));
-                    }
                 }
             }
         }

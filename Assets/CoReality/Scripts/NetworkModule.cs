@@ -36,7 +36,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     /// </summary>
     protected DefaultTrackableEventHandler _vuforiaTarget;
 
-    [SerializeField, Tooltip("An array of objects that are automatically attached to the networked origin transform")]
+    [SerializeField, Tooltip("An array of objects that are automatically attached to the networked origin transform at runtime.")]
     /// <summary>
     /// Setting these objects will ensure they follower the networked origin 
     /// (aka. the vuforia target's position in worldspace)
@@ -194,6 +194,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
 
     public void OnDisconnected(DisconnectCause cause)
     {
+        Debug.LogError("Disconnected from server " + cause.ToString());
         _onDisconnected.Invoke();
     }
 

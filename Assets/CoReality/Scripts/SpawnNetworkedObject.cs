@@ -13,7 +13,7 @@ public class SpawnNetworkedObject : MonoBehaviour, IOnEventCallback
     /// <summary>
     /// The byte code for this spawn object event
     /// </summary>
-    public const byte SPAWN_BYTE = 0x55;
+    public const byte SPAWN_EVENT = 0x55;
 
     [SerializeField]
     private GrabbableView _objectToSpawn;
@@ -57,7 +57,7 @@ public class SpawnNetworkedObject : MonoBehaviour, IOnEventCallback
                 if (PhotonNetwork.AllocateViewID(go.photonView))
                 {
                     PhotonNetwork.RaiseEvent(
-                        SPAWN_BYTE,
+                        SPAWN_EVENT,
                         new object[]
                         {
                             go.transform.localPosition,
@@ -84,7 +84,7 @@ public class SpawnNetworkedObject : MonoBehaviour, IOnEventCallback
     /// <param name="photonEvent"></param>
     public void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code == SPAWN_BYTE)
+        if (photonEvent.Code == SPAWN_EVENT)
         {
             var data = (object[])photonEvent.CustomData;
             SpawnObject(

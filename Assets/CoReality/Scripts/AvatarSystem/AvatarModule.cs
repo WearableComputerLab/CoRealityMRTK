@@ -3,19 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 /// <summary>
 /// Controls the spawning of HoloAvatars on photon callbacks
 /// </summary>
-public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbacks
+public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbacks, IOnEventCallback
 {
     public static AvatarModule Instance;
 
+    public const byte AVATAR_EVENT = 0x60;
+
     //------------------------------------
+
 
     [SerializeField, Tooltip("Enables the Avatar hands and hand data to be sent over the network, see readme" +
         " on how to set up this feature.")]
-    private bool _enableHands;
+    private bool _enableHands = true;
 
     public static bool EnableHands
     {
@@ -44,44 +48,98 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
         get => Instance._remoteAvatars;
     }
 
+    [SerializeField]
+    private HoloAvatar _holoAvatarPrefab;
+
     void Awake()
     {
         Instance = this;
+
+        //Check for network module (Ensure this is after NetworkModule in Script Execution Order)
+        if (!NetworkModule.Instance)
+            throw new System.Exception("NetworkModule not present in scene? Can't start AvatarModule until it exists.");
+
+        //Add HandPose to Photon's known serializable data types
+        PhotonPeer.RegisterType(typeof(HandPose), 0x68, HandPose.SerializeHandPose, HandPose.DeserializeHandPose);
         PhotonNetwork.AddCallbackTarget(this);
     }
 
-    void Start()
+
+    private void SpawnAvatar(bool remote, int viewID = -1)
     {
+        //spawn local avatar
+        HoloAvatar avatar = Instantiate(_holoAvatarPrefab);
+        avatar.Initalize(remote);
 
-    }
-
-    void Update()
-    {
-
+        //If the avatar is local, raise event to create a remote version for everyone else
+        if (!remote)
+        {
+            _localAvatar = avatar;
+            if (PhotonNetwork.AllocateViewID(_localAvatar.photonView))
+            {
+                PhotonNetwork.RaiseEvent(
+                    AVATAR_EVENT,
+                    _localAvatar.photonView.ViewID,
+                    new RaiseEventOptions
+                    {
+                        Receivers = ReceiverGroup.Others,
+                        CachingOption = EventCaching.AddToRoomCache
+                    },
+                    new SendOptions
+                    {
+                        Reliability = true
+                    }
+                );
+            }
+            else
+            {
+                Debug.LogError("Failed to allocate viewID for Avatar");
+                Destroy(_localAvatar.gameObject);
+            }
+        }
+        else
+        {
+            //Added avatar to the remote avatar's dictionary
+            avatar.photonView.ViewID = viewID;
+            _remoteAvatars.Add(avatar.photonView.OwnerActorNr, avatar);
+        }
+        //Set color
+        _localAvatar.Color = new Color(1, 0, 0);
     }
 
     public void OnJoinedRoom()
     {
-        //Spawn local avatar and raise event
-
+        //Spawn local avatar
+        SpawnAvatar(false);
     }
 
     public void OnLeftRoom()
     {
-        //Remove all avatars including own
-
+        //Remove all avatars including self
+        _localAvatar.Destroy();
+        _localAvatar = null;
+        foreach (HoloAvatar avatar in _remoteAvatars.Values)
+            avatar.Destroy();
+        _remoteAvatars.Clear();
     }
 
     public void OnPlayerLeftRoom(Player otherPlayer)
     {
         //Remove the avatar for the player who left
-        
+        if (otherPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            return;
+        _remoteAvatars[otherPlayer.ActorNumber].Destroy();
+        _remoteAvatars.Remove(otherPlayer.ActorNumber);
     }
 
-
-
+    public void OnEvent(EventData photonEvent)
+    {
+        if (photonEvent.Code == AVATAR_EVENT)
+            SpawnAvatar(true, (int)photonEvent.CustomData);
+    }
 
     //Unused 
+
     public void OnPlayerEnteredRoom(Player newPlayer)
     { }
 
@@ -107,4 +165,5 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
 
     public void OnMasterClientSwitched(Player newMasterClient)
     { }
+
 }
