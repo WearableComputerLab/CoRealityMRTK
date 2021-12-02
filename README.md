@@ -1,4 +1,6 @@
-# Cooperative Reality
+<p align="center">
+  <img src="./images/logo.png" />
+</p>
 
 ## Requirements
 
@@ -39,3 +41,7 @@ Module for connecting / disconnecting from the photon server.
 ### Avatar Module
 
 Module for creating user avatars and syncronizing them between all users.
+
+# Disclaimer
+
+This software is provided WITHOUT support.
