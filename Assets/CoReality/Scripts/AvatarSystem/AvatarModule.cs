@@ -4,7 +4,8 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
-
+using System;
+using UnityEngine.Events;
 /// <summary>
 /// Controls the spawning of HoloAvatars on photon callbacks
 /// </summary>
@@ -14,17 +15,6 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
 
     public const byte AVATAR_EVENT = 0x60;
 
-    //------------------------------------
-
-
-    [SerializeField, Tooltip("Enables the Avatar hands and hand data to be sent over the network, see readme" +
-        " on how to set up this feature.")]
-    private bool _enableHands = true;
-
-    public static bool EnableHands
-    {
-        get => Instance._enableHands;
-    }
 
     //------------------------------------
 
@@ -50,6 +40,22 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
 
     [SerializeField]
     private HoloAvatar _holoAvatarPrefab;
+
+    //--------------------------------------
+
+    [SerializeField, Tooltip("Called when a new HoloAvatar object is createds")]
+    protected HoloAvatarEvent _onAvatarCreated;
+
+    /// <summary>
+    /// Called when a new avatar is created
+    /// </summary>
+    /// <value></value>
+    public HoloAvatarEvent OnAvatarCreated { get => _onAvatarCreated; }
+
+    [SerializeField, Tooltip("This is called just before the HoloAvatar's gameobject is destoryed.")]
+    protected HoloAvatarEvent _onAvatarDestroyed;
+
+    public HoloAvatarEvent OnAvatarDestroyed { get => _onAvatarDestroyed; }
 
     void Awake()
     {
@@ -90,6 +96,7 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
                         Reliability = true
                     }
                 );
+                _onAvatarCreated?.Invoke(avatar);
             }
             else
             {
@@ -102,6 +109,7 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
             //Added avatar to the remote avatar's dictionary
             avatar.photonView.ViewID = viewID;
             _remoteAvatars.Add(avatar.photonView.OwnerActorNr, avatar);
+            _onAvatarCreated?.Invoke(avatar);
         }
         //Set color
         _localAvatar.Color = new Color(1, 0, 0);
@@ -119,7 +127,10 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
         _localAvatar.Destroy();
         _localAvatar = null;
         foreach (HoloAvatar avatar in _remoteAvatars.Values)
+        {
+            _onAvatarDestroyed?.Invoke(avatar);
             avatar.Destroy();
+        }
         _remoteAvatars.Clear();
     }
 
@@ -128,7 +139,9 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
         //Remove the avatar for the player who left
         if (otherPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             return;
-        _remoteAvatars[otherPlayer.ActorNumber].Destroy();
+        var avatar = _remoteAvatars[otherPlayer.ActorNumber];
+        _onAvatarDestroyed?.Invoke(avatar);
+        avatar.Destroy();
         _remoteAvatars.Remove(otherPlayer.ActorNumber);
     }
 
@@ -139,31 +152,26 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
     }
 
     //Unused 
-
     public void OnPlayerEnteredRoom(Player newPlayer)
     { }
-
     public void OnCreatedRoom()
     { }
-
     public void OnCreateRoomFailed(short returnCode, string message)
     { }
-
     public void OnFriendListUpdate(List<FriendInfo> friendList)
     { }
-
     public void OnJoinRandomFailed(short returnCode, string message)
     { }
-
     public void OnJoinRoomFailed(short returnCode, string message)
     { }
     public void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     { }
-
     public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     { }
-
     public void OnMasterClientSwitched(Player newMasterClient)
     { }
 
 }
+
+[Serializable]
+public class HoloAvatarEvent : UnityEvent<HoloAvatar> { }

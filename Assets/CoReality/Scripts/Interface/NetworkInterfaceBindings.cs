@@ -6,42 +6,66 @@ using TMPro;
 using Photon.Pun;
 
 /// <summary>
-/// Interface bindings
+/// Example interface bindings for CoReality networking
 /// </summary>
 public class NetworkInterfaceBindings : MonoBehaviour
 {
-    [SerializeField]
-    TextMeshProUGUI _playerCountText;
+
     [SerializeField]
     TextMeshProUGUI _connStatusText;
+
+
     [SerializeField]
-    Button _connectionButton;
+
+    TextMeshProUGUI _pingText;
+
+    [SerializeField]
+    Button _quitButton;
 
     void Start()
     {
-        _connStatusText.text = "Disconnected";
-        _connStatusText.color = Color.red;
-
-        if (NetworkModule.Instance)
+        if (_connStatusText)
         {
+            _connStatusText.text = "Disconnected";
+            _connStatusText.color = Color.red;
+        }
+
+        _quitButton?.onClick.AddListener(()=>{
+            Application.Quit();
+        });
+
+        // if (NetworkModule.Instance)
+        {
+              
             NetworkModule.OnConnectedEvent.AddListener(() =>
             {
-                _connStatusText.text = "Connected";
-                _connStatusText.color = Color.green;
+                if (_connStatusText)
+                {
+                    _connStatusText.text = "Connected";
+                    _connStatusText.color = Color.green;
+                }
             });
             NetworkModule.OnDisconnectedEvent.AddListener(() =>
             {
-                _connStatusText.text = "Disconnected";
-                _connStatusText.color = Color.red;
+                if (_connStatusText)
+                {
+                    _connStatusText.text = "Disconnected";
+                    _connStatusText.color = Color.red;
+                }
             });
-            NetworkModule.OnPlayerJoinedRoomEvent.AddListener(player =>
-            {
-                _playerCountText.text = "Players = " + PhotonNetwork.PlayerList.Length;
-            });
-            NetworkModule.OnPlayerLeftRoomEvent.AddListener(player =>
-            {
-                _playerCountText.text = "Players = " + PhotonNetwork.PlayerList.Length;
-            });
+
+        }
+    }
+
+
+
+
+    void Update()
+    {
+        if (NetworkModule.Instance && PhotonNetwork.IsConnectedAndReady)
+        {
+            if (_pingText)
+                _pingText.text = PhotonNetwork.GetPing() + "ms";
         }
     }
 
