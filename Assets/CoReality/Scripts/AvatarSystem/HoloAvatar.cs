@@ -123,8 +123,12 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
         {
             //instantiate the remote objects for this avatar
             _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
-            _rightHand = Instantiate(_rHandPrefab, Vector3.zero, Quaternion.identity, transform);
-            _leftHand = Instantiate(_lHandPrefab, Vector3.zero, Quaternion.identity, transform);
+            _rightHand = Instantiate(_rHandPrefab);
+            _leftHand = Instantiate(_lHandPrefab);
+            _rightHand.transform.SetParent(transform);
+            _leftHand.transform.SetParent(transform);
+            _rightHand.transform.localPosition = _leftHand.transform.localPosition = Vector3.zero;
+            _rightHand.transform.localRotation = _leftHand.transform.localRotation = Quaternion.identity;
         }
 
         _isInitalized = true;
@@ -163,7 +167,7 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
             if (left)
             {
                 _lHandRef.transform.position = left.AvatarRiggedHands.Root.position;
-                _rHandRef.transform.rotation = left.AvatarRiggedHands.Root.rotation;
+                _lHandRef.transform.rotation = left.AvatarRiggedHands.Root.rotation;
                 HandPose pose = new HandPose(left.AvatarRiggedHands, _lHandRef.transform.localPosition, _lHandRef.transform.localRotation);
                 _streamQueue.SendNext(pose);
             }
@@ -186,9 +190,6 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
             _streamQueue.SendNext(new HandPose { IsLeft = true, IsActive = false });
             _streamQueue.SendNext(new HandPose { IsLeft = false, IsActive = false });
         }
-
-
-
     }
 
     private void DeserializeData()
