@@ -6,21 +6,28 @@ using TMPro;
 using Photon.Pun;
 
 /// <summary>
-/// Example interface bindings for CoReality networking
+/// Interface bindings for the network interface
 /// </summary>
 public class NetworkInterfaceBindings : MonoBehaviour
 {
+    //Requires NetworkInterface
+    [SerializeField]
+    private TextMeshProUGUI _connStatusText;
 
     [SerializeField]
-    TextMeshProUGUI _connStatusText;
-
-
-    [SerializeField]
-
-    TextMeshProUGUI _pingText;
+    private TextMeshProUGUI _pingText;
 
     [SerializeField]
-    Button _quitButton;
+    private Button _quitButton;
+
+    //Requires AvatarModule
+    [SerializeField]
+    private VerticalLayout _userLayout;
+
+    [SerializeField]
+    private UserItem _userItemPrefab;
+
+    private Dictionary<HoloAvatar, UserItem> _userItems = new Dictionary<HoloAvatar, UserItem>();
 
     void Start()
     {
@@ -30,13 +37,14 @@ public class NetworkInterfaceBindings : MonoBehaviour
             _connStatusText.color = Color.red;
         }
 
-        _quitButton?.onClick.AddListener(()=>{
+        _quitButton?.onClick.AddListener(() =>
+        {
             Application.Quit();
         });
 
-        // if (NetworkModule.Instance)
+        if (NetworkModule.Instance)
         {
-              
+
             NetworkModule.OnConnectedEvent.AddListener(() =>
             {
                 if (_connStatusText)
@@ -54,6 +62,23 @@ public class NetworkInterfaceBindings : MonoBehaviour
                 }
             });
 
+        }
+
+        if (AvatarModule.Instance)
+        {
+            AvatarModule.OnAvatarCreated.AddListener((avatar) =>
+            {
+                UserItem item = Instantiate(_userItemPrefab);
+                item.Color = avatar.Color;
+                item.Name = "test";
+                _userLayout.AddItem(item.RectTransform);
+                _userItems.Add(avatar, item);
+            });
+
+            AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
+            {
+                _userLayout.RemoveItem(_userItems[avatar].RectTransform);
+            });
         }
     }
 

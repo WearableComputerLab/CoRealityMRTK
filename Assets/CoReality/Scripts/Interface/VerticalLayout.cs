@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class IVerticalLayout : MonoBehaviour
+public class VerticalLayout : MonoBehaviour
 {
     private bool _isDirty = false;
 
@@ -75,8 +75,9 @@ public class IVerticalLayout : MonoBehaviour
         float vPos = 0f;
         foreach (RectTransform c in Children)
         {
-            c.DOAnchorPos(new Vector3(c.anchoredPosition.x, -vPos), 0.3f);
-            // c.anchoredPosition = new Vector3(c.anchoredPosition.x, -vPos);
+            //Requires DOTWEEN
+            // c.DOAnchorPos(new Vector3(c.anchoredPosition.x, -vPos), 0.3f);
+            c.anchoredPosition = new Vector3(c.anchoredPosition.x, -vPos);
             vPos += c.sizeDelta.y + _spacing;
         }
         RectTransform.sizeDelta = new Vector2(RectTransform.sizeDelta.x, vPos);

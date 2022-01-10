@@ -43,19 +43,19 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
 
     //--------------------------------------
 
-    [SerializeField, Tooltip("Called when a new HoloAvatar object is createds")]
+    [SerializeField, Tooltip("Called when a new HoloAvatar object is created")]
     protected HoloAvatarEvent _onAvatarCreated;
 
     /// <summary>
     /// Called when a new avatar is created
     /// </summary>
     /// <value></value>
-    public HoloAvatarEvent OnAvatarCreated { get => _onAvatarCreated; }
+    public static HoloAvatarEvent OnAvatarCreated { get => Instance._onAvatarCreated; }
 
     [SerializeField, Tooltip("This is called just before the HoloAvatar's gameobject is destoryed.")]
     protected HoloAvatarEvent _onAvatarDestroyed;
 
-    public HoloAvatarEvent OnAvatarDestroyed { get => _onAvatarDestroyed; }
+    public static HoloAvatarEvent OnAvatarDestroyed { get => Instance._onAvatarDestroyed; }
 
     void Awake()
     {
