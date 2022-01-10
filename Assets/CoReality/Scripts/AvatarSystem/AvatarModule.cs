@@ -41,10 +41,59 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
     [SerializeField]
     private HoloAvatar _holoAvatarPrefab;
 
+
+    [SerializeField]
+    private List<string> _randomAdjectives = new List<string>{
+        "Mighty",
+        "Tiny",
+        "Brave",
+        "Plain",
+        "Chilly",
+        "Basic",
+        "Crazy",
+        "Calm",
+        "Untidy",
+        "Gentle",
+        "Keen",
+        "Quiet",
+        "Vague",
+        "Rare",
+        "Jolly"
+    };
+
+    [SerializeField]
+    private List<string> _randomNouns = new List<string>{
+        "Cupboard",
+        "Kettle",
+        "Lion",
+        "Avalanche",
+        "Apple",
+        "Seaweed",
+        "Rabbit",
+        "Archer",
+        "Expert",
+        "Shoes",
+        "Guitar",
+        "Shadow",
+        "Calculator",
+        "Texture",
+        "Force"
+    };
+
+    [SerializeField]
+    private List<Color> _randomColors = new List<Color>{
+        Color.red,
+        Color.yellow,
+        Color.green,
+        Color.blue,
+        Color.cyan,
+        Color.magenta,
+    };
+
     //--------------------------------------
 
     [SerializeField, Tooltip("Called when a new HoloAvatar object is created")]
-    protected HoloAvatarEvent _onAvatarCreated;
+    protected HoloAvatarEvent _onAvatarCreated = new HoloAvatarEvent();
 
     /// <summary>
     /// Called when a new avatar is created
@@ -53,9 +102,12 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
     public static HoloAvatarEvent OnAvatarCreated { get => Instance._onAvatarCreated; }
 
     [SerializeField, Tooltip("This is called just before the HoloAvatar's gameobject is destoryed.")]
-    protected HoloAvatarEvent _onAvatarDestroyed;
-
+    protected HoloAvatarEvent _onAvatarDestroyed = new HoloAvatarEvent();
     public static HoloAvatarEvent OnAvatarDestroyed { get => Instance._onAvatarDestroyed; }
+
+    [SerializeField, Tooltip("Called when an HoloAvatar's property has changed")]
+    protected HoloAvatarPropertyChanged _onAvatarPropertyChanged = new HoloAvatarPropertyChanged();
+    public static HoloAvatarPropertyChanged OnAvatarPropertyChanged { get => Instance._onAvatarPropertyChanged; }
 
     void Awake()
     {
@@ -111,8 +163,14 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
             _remoteAvatars.Add(avatar.photonView.OwnerActorNr, avatar);
             _onAvatarCreated?.Invoke(avatar);
         }
+
+        //Forward property change event
+        avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
+
         //Set color
-        _localAvatar.Color = new Color(1, 0, 0);
+        _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
+                            + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
+        _localAvatar.Color = _randomColors[UnityEngine.Random.Range(0, _randomColors.Count)];
     }
 
     public void OnJoinedRoom()
@@ -175,3 +233,5 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
 
 [Serializable]
 public class HoloAvatarEvent : UnityEvent<HoloAvatar> { }
+
+public class HoloAvatarPropertyChanged : UnityEvent<HoloAvatar, string, object> { }

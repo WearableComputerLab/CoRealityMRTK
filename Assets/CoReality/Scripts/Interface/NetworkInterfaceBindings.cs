@@ -29,7 +29,7 @@ public class NetworkInterfaceBindings : MonoBehaviour
 
     private Dictionary<HoloAvatar, UserItem> _userItems = new Dictionary<HoloAvatar, UserItem>();
 
-    void Start()
+    void Awake()
     {
         if (_connStatusText)
         {
@@ -42,7 +42,7 @@ public class NetworkInterfaceBindings : MonoBehaviour
             Application.Quit();
         });
 
-        if (NetworkModule.Instance)
+        // if (NetworkModule.Instance)
         {
 
             NetworkModule.OnConnectedEvent.AddListener(() =>
@@ -53,6 +53,7 @@ public class NetworkInterfaceBindings : MonoBehaviour
                     _connStatusText.color = Color.green;
                 }
             });
+            
             NetworkModule.OnDisconnectedEvent.AddListener(() =>
             {
                 if (_connStatusText)
@@ -64,8 +65,9 @@ public class NetworkInterfaceBindings : MonoBehaviour
 
         }
 
-        if (AvatarModule.Instance)
+        // if (AvatarModule.Instance)
         {
+            //Listen to avatar created event
             AvatarModule.OnAvatarCreated.AddListener((avatar) =>
             {
                 UserItem item = Instantiate(_userItemPrefab);
@@ -75,13 +77,31 @@ public class NetworkInterfaceBindings : MonoBehaviour
                 _userItems.Add(avatar, item);
             });
 
+            //Listen to Avatar property change events
+            AvatarModule.OnAvatarPropertyChanged.AddListener((avatar, prop, val) =>
+            {
+                switch (prop)
+                {
+                    case nameof(avatar.Color):
+                        {
+                            _userItems[avatar].Color = (Color)val;
+                            break;
+                        }
+                    case nameof(avatar.Name):
+                        {
+                            _userItems[avatar].Name = (string)val;
+                            break;
+                        }
+                }
+            });
+
+            //Listen to avatar destroyed events
             AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
             {
                 _userLayout.RemoveItem(_userItems[avatar].RectTransform);
             });
         }
     }
-
 
 
 

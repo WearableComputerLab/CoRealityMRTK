@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Realtime;
 using Photon.Pun;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(PhotonView))]
 public class HoloAvatar : MonoBehaviourPun, IPunObservable
@@ -20,6 +21,34 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
         get => _local;
     }
 
+
+    private string _name;
+
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value + (IsLocal ? " (you)" : "");
+            PropertyChanged(nameof(Name), Name);
+
+            //RPC to update color to others if locally changed
+            if (IsLocal)
+            {
+                photonView.RPC(
+                    nameof(SetNameRPC),
+                    RpcTarget.OthersBuffered,
+                    value
+                );
+            }
+            else
+            {
+                //If remote set the name text above their head
+                _head.Name = value;
+            }
+        }
+    }
+
     private Color _color;
     public Color Color
     {
@@ -27,6 +56,7 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
         set
         {
             _color = value;
+            PropertyChanged(nameof(Color), Color);
 
             //RPC to update color to others if locally changed
             if (IsLocal)
@@ -34,7 +64,7 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
                 photonView.RPC(
                     nameof(SetColorRPC),
                     RpcTarget.OthersBuffered,
-                    new Vector3(_color.r, _color.g, _color.b)
+                    new Vector3(value.r, value.g, value.b)
                 );
             }
             else
@@ -56,10 +86,10 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
     private GameObject _headRef, _lHandRef, _rHandRef;
 
     [SerializeField]
-    private GameObject _headPrefab;
-    private GameObject _head;
+    private AvatarHead _headPrefab;
+    private AvatarHead _head;
 
-    public GameObject Head
+    public AvatarHead Head
     {
         get => _head;
     }
@@ -81,6 +111,22 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
     {
         get => _rightHand;
     }
+
+    //---------------------------------------------
+
+    private PropertyChangedEvent _onPropertyChanged = new PropertyChangedEvent();
+
+    public PropertyChangedEvent OnPropertyChanged
+    {
+        get => _onPropertyChanged;
+    }
+
+    private void PropertyChanged(string property, object value)
+    {
+        _onPropertyChanged?.Invoke(property, value);
+    }
+
+
 
     void Awake()
     {
@@ -239,6 +285,8 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
 
     public void Destroy()
     {
+        //Clean up all listeners
+        _onPropertyChanged.RemoveAllListeners();
         if (IsLocal)
         {
             Destroy(_headRef.gameObject);
@@ -256,6 +304,21 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
         Color = new Color(color.x, color.y, color.z);
     }
 
+    [PunRPC]
+    void SetNameRPC(string name)
+    {
+        Name = name;
+    }
+
+    [PunRPC]
+    void PropertyChangedRPC(string property, object value)
+    {
+        //TODO
+    }
+
     #endregion
 
 }
+
+
+public class PropertyChangedEvent : UnityEvent<string, object> { }
