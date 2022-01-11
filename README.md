@@ -31,6 +31,15 @@ Download and add the [PUN 2 - Free asset from the asset store](https://assetstor
 
 TBD
 
+## Example Scenes
+
+### 1 Networked Object
+
+### 2 Hololens Avatars
+
+### 3 Desktop and Hololens
+
+Demonstrates a multi-scene project that lets desktop and hololens builds communicate with eachother. Put all three scenes in the build output, the first scene `Startup` will automatically detect the target platform and load the Hololens or Desktop scene accordingly. Desktop users can use the middle mouse button to rotate the scene.
 
 ## Modules
 
@@ -42,6 +51,6 @@ Module for connecting / disconnecting from the photon server.
 
 Module for creating user avatars and syncronizing them between all users.
 
+
 # Disclaimer
 
-This software is provided WITHOUT support.
