@@ -38,9 +38,16 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
         get => Instance._remoteAvatars;
     }
 
-    [SerializeField]
+    [SerializeField, Tooltip("The prefab for the hololens avatar")]
     private HoloAvatar _holoAvatarPrefab;
 
+    [SerializeField, Tooltip("The default material for the avatar hands")]
+    private Material _defaultHandMaterial;
+
+    public static Material DefaultHandMaterial
+    {
+        get => Instance._defaultHandMaterial;
+    }
 
     [SerializeField]
     private List<string> _randomAdjectives = new List<string>{

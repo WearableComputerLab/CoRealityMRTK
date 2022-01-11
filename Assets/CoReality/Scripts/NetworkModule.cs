@@ -28,7 +28,7 @@ public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCa
     [SerializeField, Tooltip("The name of the room to connect too.")]
     protected string _roomName = "default";
 
-    [SerializeField, Tooltip("The vuforia target. This marker is what is used to align each user's networked space.")]
+    [SerializeField, Tooltip("The OPTIONAL vuforia target. This marker is what is used to align each user's networked space.")]
     /// <summary>
     /// If no vuforia target is supplied the default position of the origin will be world zero
     /// and all users will be aligned around their world zero (the spatial head position the

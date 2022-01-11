@@ -175,6 +175,9 @@ public class HoloAvatar : MonoBehaviourPun, IPunObservable
             _leftHand.transform.SetParent(transform);
             _rightHand.transform.localPosition = _leftHand.transform.localPosition = Vector3.zero;
             _rightHand.transform.localRotation = _leftHand.transform.localRotation = Quaternion.identity;
+            //Set the default hand material if its not null
+            if (AvatarModule.DefaultHandMaterial)
+                _rightHand.MeshRenderer.material = _leftHand.MeshRenderer.material = AvatarModule.DefaultHandMaterial;
         }
 
         _isInitalized = true;

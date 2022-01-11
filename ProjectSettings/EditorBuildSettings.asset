@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/CoReality/Examples/2 Hololens Avatars/2 Hololens Avatars.unity
-    guid: f0a2ab1031f83e64e84ecdbc62bfe8fb
+    path: Assets/CoReality/Examples/3 Desktop Hololens Mode/3.1 Startup.unity
+    guid: 000844f5b22562846a892f5ac9d8c9fd
+  - enabled: 1
+    path: Assets/CoReality/Examples/3 Desktop Hololens Mode/3.2 Desktop.unity
+    guid: af1d792426ea7804ca6ecffa736b7ae8
+  - enabled: 1
+    path: Assets/CoReality/Examples/3 Desktop Hololens Mode/3.3 Hololens.unity
+    guid: bcaa3e1a7829cef45832d078dccb5b27
   m_configObjects: {}
