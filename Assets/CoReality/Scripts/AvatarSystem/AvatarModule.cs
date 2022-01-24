@@ -48,6 +48,8 @@ public class AvatarModule : MonoBehaviour, IMatchmakingCallbacks, IInRoomCallbac
     {
         get => Instance._defaultHandMaterial;
     }
+    
+    [Header("Uniqueness Generator")]
 
     [SerializeField]
     private List<string> _randomAdjectives = new List<string>{
