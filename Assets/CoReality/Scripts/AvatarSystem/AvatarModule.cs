@@ -128,16 +128,21 @@ namespace CoReality.Avatars
 
             //Check for network module (Ensure this is after NetworkModule in Script Execution Order)
             if (!NetworkModule.Instance)
-                throw new System.Exception("NetworkModule not present in scene? Can't start AvatarModule until it exists.");
+                throw new System.Exception("NetworkModule not present in scene? Can't start AvatarModule without it.");
 
             //Add HandPose to Photon's known serializable data types
             PhotonPeer.RegisterType(typeof(HandPose), 0x68, HandPose.SerializeHandPose, HandPose.DeserializeHandPose);
             PhotonNetwork.AddCallbackTarget(this);
         }
 
-
+        /// <summary>
+        /// Spawns either a remote or local avatar
+        /// </summary>
+        /// <param name="remote">flag to spawn a remote or local avatar</param>
+        /// <param name="viewID"> the avatar's view idea, only needed for remote spawning</param>
         private void SpawnAvatar(bool remote, int viewID = -1)
         {
+            print("Spawn Avatar Start");
             //spawn local avatar
             HoloAvatar avatar = Instantiate(_holoAvatarPrefab);
             avatar.Initalize(remote);
@@ -154,11 +159,11 @@ namespace CoReality.Avatars
                         new RaiseEventOptions
                         {
                             Receivers = ReceiverGroup.Others,
-                            CachingOption = EventCaching.AddToRoomCache
+                            CachingOption = EventCaching.AddToRoomCache,
                         },
                         new SendOptions
                         {
-                            Reliability = true
+                            DeliveryMode = DeliveryMode.Reliable
                         }
                     );
                     _onAvatarCreated?.Invoke(avatar);
@@ -184,7 +189,11 @@ namespace CoReality.Avatars
             _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
                                 + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
             _localAvatar.Color = _randomColors[UnityEngine.Random.Range(0, _randomColors.Count)];
+
+            print("Spawn Avatar End");
         }
+
+        #region PUN Callbacks
 
         public void OnJoinedRoom()
         {
@@ -218,6 +227,7 @@ namespace CoReality.Avatars
 
         public void OnEvent(EventData photonEvent)
         {
+            print("On Event");
             if (photonEvent.Code == AVATAR_EVENT)
                 SpawnAvatar(true, (int)photonEvent.CustomData);
         }
@@ -241,6 +251,8 @@ namespace CoReality.Avatars
         { }
         public void OnMasterClientSwitched(Player newMasterClient)
         { }
+
+        #endregion
 
     }
 

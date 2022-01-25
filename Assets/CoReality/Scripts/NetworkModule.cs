@@ -34,8 +34,8 @@ namespace CoReality
         [SerializeField, Tooltip("The OPTIONAL vuforia target. This marker is what is used to align each user's networked space.")]
         /// <summary>
         /// If no vuforia target is supplied the default position of the origin will be world zero
-        /// and all users will be aligned around their world zero (the spatial head position the
-        /// application was launched from).
+        /// and all users will be aligned around that position
+        /// On hololens this is the user's inital head position when the launch the application.
         /// </summary>
         protected DefaultTrackableEventHandler _vuforiaTarget;
 
@@ -139,43 +139,28 @@ namespace CoReality
         #region  PUN Callbacks
 
         public void OnFriendListUpdate(List<FriendInfo> friendList)
-        {
-
-        }
+        {}
 
         public void OnCreatedRoom()
-        {
-
-        }
+        {}
 
         public void OnCreateRoomFailed(short returnCode, string message)
-        {
-
-        }
+        {}
 
         public void OnJoinedRoom()
-        {
-
-        }
+        {}
 
         public void OnJoinRoomFailed(short returnCode, string message)
-        {
-
-        }
+        {}
 
         public void OnJoinRandomFailed(short returnCode, string message)
-        {
-
-        }
+        {}
 
         public void OnLeftRoom()
-        {
-
-        }
+        {}
 
         public void OnConnected()
-        {
-        }
+        {}
 
         public void OnConnectedToMaster()
         {
