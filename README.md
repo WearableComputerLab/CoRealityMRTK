@@ -35,11 +35,25 @@ TBD
 
 ### 1 Networked Object
 
+Simple scene that demonstrates spawning and manipulation of a networked object across a photon network.
+
 ### 2 Hololens Avatars
+
+Demonstrates the Avatar system which allows users to see each other in virtual space. Users will be able to see other player's heads and hands including their current hand pose. The scene also demonstrates use of stencil shaders on the user's hands so they only appear 'infront' of other objects.
 
 ### 3 Desktop and Hololens
 
-Demonstrates a multi-scene project that lets desktop and hololens builds communicate with eachother. Put all three scenes in the build output, the first scene `Startup` will automatically detect the target platform and load the Hololens or Desktop scene accordingly. Desktop users can use the middle mouse button to rotate the scene.
+Demonstrates a multi-scene project that lets desktop and hololens builds communicate with eachother. 
+
+#### To run
+
+Put all three scenes in the build output, the first scene `Startup` will automatically detect the target platform and load the Hololens or Desktop scene accordingly. Desktop users can use the middle mouse button to rotate the scene.
+
+### 4 Hololens Mini Me
+
+*WIP*
+
+Demonstrates the ability to scale player size in realtime to make the scene appear bigger or smaller.
 
 ## Modules
 
@@ -50,7 +64,4 @@ Module for connecting / disconnecting from the photon server.
 ### Avatar Module
 
 Module for creating user avatars and syncronizing them between all users.
-
-
-# Disclaimer
 
