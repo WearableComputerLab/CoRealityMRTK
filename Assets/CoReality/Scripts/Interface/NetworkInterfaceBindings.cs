@@ -4,114 +4,122 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Photon.Pun;
+using CoReality.Avatars;
 
-/// <summary>
-/// Interface bindings for the network interface
-/// </summary>
-public class NetworkInterfaceBindings : MonoBehaviour
+namespace CoReality
 {
-    //Requires NetworkInterface
-    [SerializeField]
-    private TextMeshProUGUI _connStatusText;
 
-    [SerializeField]
-    private TextMeshProUGUI _pingText;
 
-    [SerializeField]
-    private Button _quitButton;
 
-    //Requires AvatarModule
-    [SerializeField]
-    private VerticalLayout _userLayout;
-
-    [SerializeField]
-    private UserItem _userItemPrefab;
-
-    private Dictionary<HoloAvatar, UserItem> _userItems = new Dictionary<HoloAvatar, UserItem>();
-
-    void Awake()
+    /// <summary>
+    /// Interface bindings for the network interface
+    /// </summary>
+    public class NetworkInterfaceBindings : MonoBehaviour
     {
-        if (_connStatusText)
-        {
-            _connStatusText.text = "Disconnected";
-            _connStatusText.color = Color.red;
-        }
+        //Requires NetworkInterface
+        [SerializeField]
+        private TextMeshProUGUI _connStatusText;
 
-        _quitButton?.onClick.AddListener(() =>
-        {
-            Application.Quit();
-        });
+        [SerializeField]
+        private TextMeshProUGUI _pingText;
 
-        // if (NetworkModule.Instance)
-        {
+        [SerializeField]
+        private Button _quitButton;
 
-            NetworkModule.OnConnectedEvent.AddListener(() =>
+        //Requires AvatarModule
+        [SerializeField]
+        private VerticalLayout _userLayout;
+
+        [SerializeField]
+        private UserItem _userItemPrefab;
+
+        private Dictionary<HoloAvatar, UserItem> _userItems = new Dictionary<HoloAvatar, UserItem>();
+
+        void Awake()
+        {
+            if (_connStatusText)
             {
-                if (_connStatusText)
+                _connStatusText.text = "Disconnected";
+                _connStatusText.color = Color.red;
+            }
+
+            _quitButton?.onClick.AddListener(() =>
+            {
+                Application.Quit();
+            });
+
+            // if (NetworkModule.Instance)
+            {
+
+                NetworkModule.OnConnectedEvent.AddListener(() =>
                 {
-                    _connStatusText.text = "Connected";
-                    _connStatusText.color = Color.green;
-                }
-            });
-            
-            NetworkModule.OnDisconnectedEvent.AddListener(() =>
-            {
-                if (_connStatusText)
+                    if (_connStatusText)
+                    {
+                        _connStatusText.text = "Connected";
+                        _connStatusText.color = Color.green;
+                    }
+                });
+
+                NetworkModule.OnDisconnectedEvent.AddListener(() =>
                 {
-                    _connStatusText.text = "Disconnected";
-                    _connStatusText.color = Color.red;
-                }
-            });
+                    if (_connStatusText)
+                    {
+                        _connStatusText.text = "Disconnected";
+                        _connStatusText.color = Color.red;
+                    }
+                });
 
-        }
+            }
 
-        // if (AvatarModule.Instance)
-        {
-            //Listen to avatar created event
-            AvatarModule.OnAvatarCreated.AddListener((avatar) =>
+            // if (AvatarModule.Instance)
             {
-                UserItem item = Instantiate(_userItemPrefab);
-                item.Color = avatar.Color;
-                item.Name = "test";
-                _userLayout.AddItem(item.RectTransform);
-                _userItems.Add(avatar, item);
-            });
-
-            //Listen to Avatar property change events
-            AvatarModule.OnAvatarPropertyChanged.AddListener((avatar, prop, val) =>
-            {
-                switch (prop)
+                //Listen to avatar created event
+                AvatarModule.OnAvatarCreated.AddListener((avatar) =>
                 {
-                    case nameof(avatar.Color):
-                        {
-                            _userItems[avatar].Color = (Color)val;
-                            break;
-                        }
-                    case nameof(avatar.Name):
-                        {
-                            _userItems[avatar].Name = (string)val;
-                            break;
-                        }
-                }
-            });
+                    UserItem item = Instantiate(_userItemPrefab);
+                    item.Color = avatar.Color;
+                    item.Name = "test";
+                    _userLayout.AddItem(item.RectTransform);
+                    _userItems.Add(avatar, item);
+                });
 
-            //Listen to avatar destroyed events
-            AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
-            {
-                _userLayout.RemoveItem(_userItems[avatar].RectTransform);
-            });
+                //Listen to Avatar property change events
+                AvatarModule.OnAvatarPropertyChanged.AddListener((avatar, prop, val) =>
+                {
+                    switch (prop)
+                    {
+                        case nameof(avatar.Color):
+                            {
+                                _userItems[avatar].Color = (Color)val;
+                                break;
+                            }
+                        case nameof(avatar.Name):
+                            {
+                                _userItems[avatar].Name = (string)val;
+                                break;
+                            }
+                    }
+                });
+
+                //Listen to avatar destroyed events
+                AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
+                {
+                    _userLayout.RemoveItem(_userItems[avatar].RectTransform);
+                });
+            }
         }
-    }
 
 
 
-    void Update()
-    {
-        if (NetworkModule.Instance && PhotonNetwork.IsConnectedAndReady)
+        void Update()
         {
-            if (_pingText)
-                _pingText.text = PhotonNetwork.GetPing() + "ms";
+            if (NetworkModule.Instance && PhotonNetwork.IsConnectedAndReady)
+            {
+                if (_pingText)
+                    _pingText.text = PhotonNetwork.GetPing() + "ms";
+            }
         }
+
     }
 
 }

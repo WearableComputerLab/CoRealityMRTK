@@ -3,21 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class AvatarHead : MonoBehaviour
+namespace CoReality.Avatars
 {
 
-    private string _name;
-    public string Name
+    public class AvatarHead : MonoBehaviour
     {
-        get => _name;
-        set
-        {
-            _name = value;
-            _nameText.text = value;
-        }
-    }
 
-    [SerializeField]
-    private TextMeshPro _nameText;
+        private string _name;
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                _name = value;
+                _nameText.text = value;
+            }
+        }
+
+        [SerializeField]
+        private TextMeshPro _nameText;
+
+    }
 
 }
