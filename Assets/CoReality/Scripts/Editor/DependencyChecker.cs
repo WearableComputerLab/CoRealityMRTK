@@ -8,8 +8,6 @@ namespace CoReality
 {
     public class DependencyChecker : EditorWindow
     {
-
-
         static bool _hasMRTK;
         static bool _hasVuforia;
         static bool _hasPhoton;
@@ -28,17 +26,11 @@ namespace CoReality
         {
             //Do Check
             string mrtkVersion = Application.dataPath + "/MRTK/SDK/Version.txt";
-            if (File.Exists(mrtkVersion))
-            {
-                if (File.ReadAllText(mrtkVersion)
-                .Contains("Microsoft Mixed Reality Toolkit 2.7.2"))
-                {
-                    _hasMRTK = true;
-                }
-            }
-
-            _hasPhoton = Directory.Exists(Application.dataPath + "/Photon");
-
+            string vuforiaPath = Application.dataPath + "../Packages/Vuforia";
+            string photonPath = Application.dataPath + "/Photon";
+            _hasMRTK = File.Exists(mrtkVersion);
+            _hasPhoton = Directory.Exists(photonPath);
+            _hasVuforia = Directory.Exists(vuforiaPath);
         }
 
         void OnGUI()
@@ -57,10 +49,10 @@ namespace CoReality
 
             EditorGUILayout.Separator();
 
-            EditorGUILayout.LabelField("Mixed Reality Toolkit 2.7.2", labelStyle);
+            EditorGUILayout.LabelField("Mixed Reality Toolkit >=2.7.2", labelStyle);
             if (!_hasMRTK)
             {
-                EditorGUILayoutExtensions.LinkLabel("Download there", Color.blue, Vector2.zero, 14, "https://github.com/microsoft/MixedRealityToolkit-Unity/releases/tag/v2.7.2");
+                EditorGUILayoutExtensions.LinkLabel("Download there", Color.blue, Vector2.zero, 14, "https://github.com/microsoft/MixedRealityToolkit-Unity/releases");
             }
             else
             {
@@ -69,10 +61,10 @@ namespace CoReality
 
             EditorGUILayout.Separator();
 
-            EditorGUILayout.LabelField("Vuforia (latest)", labelStyle);
+            EditorGUILayout.LabelField("Vuforia >=9.8.8", labelStyle);
             if (!_hasVuforia)
             {
-                EditorGUILayoutExtensions.LinkLabel("Download here", Color.blue, Vector2.zero, 14, "https://developer.vuforia.com/");
+                EditorGUILayoutExtensions.LinkLabel("Download here", Color.blue, Vector2.zero, 14, "https://developer.vuforia.com/downloads/sdk");
             }
             else
             {

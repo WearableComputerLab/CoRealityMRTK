@@ -6,6 +6,9 @@ using TMPro;
 namespace CoReality.Avatars
 {
 
+    /// <summary>
+    /// TODO: Gaze implementation and eye direction
+    /// </summary>
     public class AvatarHead : MonoBehaviour
     {
 

@@ -24,7 +24,6 @@ namespace CoReality.Avatars
             get => _local;
         }
 
-
         private string _name;
 
         public string Name
@@ -53,6 +52,11 @@ namespace CoReality.Avatars
         }
 
         private Color _color;
+
+        /// <summary>
+        /// Sets the color of this HoloAvatar, and updates on all clients
+        /// </summary>
+        /// <value></value>
         public Color Color
         {
             get => _color;
@@ -86,7 +90,11 @@ namespace CoReality.Avatars
 
         //---------------------------------
 
+        //Reference objects for local player 
         private GameObject _headRef, _lHandRef, _rHandRef;
+
+
+        //Remote avatar objects, only created for remote HoloAvatars
 
         [SerializeField]
         private AvatarHead _headPrefab;
@@ -95,6 +103,22 @@ namespace CoReality.Avatars
         public AvatarHead Head
         {
             get => _head;
+        }
+
+        /// <summary>
+        /// Gets the current head position of this
+        /// avatar in local-space
+        /// (Its location relative to the networked origin)
+        /// </summary>
+        public Vector3 HeadLocalPosition
+        {
+            get
+            {
+                if (_local)
+                    return _headRef.transform.localPosition;
+                else
+                    return _head.transform.localPosition;
+            }
         }
 
         [SerializeField]
@@ -128,8 +152,6 @@ namespace CoReality.Avatars
         {
             _onPropertyChanged?.Invoke(property, value);
         }
-
-
 
         void Awake()
         {
@@ -221,6 +243,10 @@ namespace CoReality.Avatars
                     _lHandRef.transform.position = left.AvatarRiggedHands.Root.position;
                     _lHandRef.transform.rotation = left.AvatarRiggedHands.Root.rotation;
                     HandPose pose = new HandPose(left.AvatarRiggedHands, _lHandRef.transform.localPosition, _lHandRef.transform.localRotation);
+
+
+
+
                     _streamQueue.SendNext(pose);
                 }
                 else
@@ -249,6 +275,7 @@ namespace CoReality.Avatars
             //HEAD
             _head.transform.localPosition = (Vector3)_streamQueue.ReceiveNext();
             _head.transform.localRotation = (Quaternion)_streamQueue.ReceiveNext();
+
             //HANDS
             HandPose leftPose = (HandPose)_streamQueue.ReceiveNext();
             if (leftPose.IsActive)
@@ -304,22 +331,45 @@ namespace CoReality.Avatars
 
         #region RPCs
 
+        /// <summary>
+        /// Remotely set the color of this player
+        /// </summary>
+        /// <param name="color"></param>
         [PunRPC]
         void SetColorRPC(Vector3 color)
         {
             Color = new Color(color.x, color.y, color.z);
         }
 
+        /// <summary>
+        /// Remotely sets the name of this player
+        /// </summary>
+        /// <param name="name"></param>
         [PunRPC]
         void SetNameRPC(string name)
         {
             Name = name;
         }
 
+        /// <summary>
+        /// Remotely sets the scale of this player's avatar
+        /// </summary>
+        /// <param name="localScale"></param>
+        [PunRPC]
+        void SetScaleRPC(Vector3 localScale)
+        {
+            //Ensure we never set a local avatar's scale
+            if (!IsLocal)
+            {
+
+
+            }
+        }
+
         [PunRPC]
         void PropertyChangedRPC(string property, object value)
         {
-            //TODO
+            //TODO: Implement if I added any more property RPCs
         }
 
         #endregion

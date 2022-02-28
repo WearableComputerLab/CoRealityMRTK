@@ -110,6 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1453345faa52baf428077a24908ebec3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MeshRenderer: {fileID: 8178360485944634701}
   Handedness: 2
   Root: {fileID: 8178360485931203649}
   Wrist: {fileID: 8178360485931203649}

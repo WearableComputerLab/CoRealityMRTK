@@ -43,6 +43,7 @@ MonoBehaviour:
   - SetColorRPC
   - PropertyChangedRPC
   - SetNameRPC
+  - SetScaleRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

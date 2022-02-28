@@ -43,4 +43,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b5625c737dd53549b6e137970e01a88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableHands: 0
+  _holoAvatarPrefab: {fileID: 1903999165951379408, guid: 9de9b658f8438eb4ba2558fa58be17b2,
+    type: 3}
+  _defaultHandMaterial: {fileID: 2100000, guid: 00507b2f91f06a848a6aae5b479b33e8,
+    type: 2}
+  _randomAdjectives:
+  - Mighty
+  - Tiny
+  - Brave
+  - Plain
+  - Chilly
+  - Basic
+  - Crazy
+  - Calm
+  - Untidy
+  - Gentle
+  - Keen
+  - Quiet
+  - Vague
+  - Rare
+  - Jolly
+  _randomNouns:
+  - Cupboard
+  - Kettle
+  - Lion
+  - Avalanche
+  - Apple
+  - Seaweed
+  - Rabbit
+  - Archer
+  - Expert
+  - Shoes
+  - Guitar
+  - Shadow
+  - Calculator
+  - Texture
+  - Force
+  _randomColors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  _onAvatarCreated:
+    m_PersistentCalls:
+      m_Calls: []
+  _onAvatarDestroyed:
+    m_PersistentCalls:
+      m_Calls: []

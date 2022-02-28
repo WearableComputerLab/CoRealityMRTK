@@ -36,10 +36,22 @@ namespace CoReality.Avatars
 
         /// <summary>
         /// List of remote avatars in the room, new avatars are added when another player joins the room
+        /// Dictionary of actor number, HoloAvatar 
         /// </summary>
         public static Dictionary<int, HoloAvatar> RemoteAvatars
         {
             get => Instance._remoteAvatars;
+        }
+
+        private List<HoloAvatar> _holoAvatars;
+
+        /// <summary>
+        /// Gets a list of all the current HoloAvatars in the scene
+        /// </summary>
+        /// <value></value>
+        public static List<HoloAvatar> HoloAvatars
+        {
+            get => Instance._holoAvatars;
         }
 
         [SerializeField, Tooltip("The prefab for the hololens avatar")]
@@ -167,6 +179,7 @@ namespace CoReality.Avatars
                         }
                     );
                     _onAvatarCreated?.Invoke(avatar);
+                    PopulateAvatarList();
                 }
                 else
                 {
@@ -179,6 +192,7 @@ namespace CoReality.Avatars
                 //Added avatar to the remote avatar's dictionary
                 avatar.photonView.ViewID = viewID;
                 _remoteAvatars.Add(avatar.photonView.OwnerActorNr, avatar);
+                PopulateAvatarList();
                 _onAvatarCreated?.Invoke(avatar);
             }
 
@@ -192,6 +206,38 @@ namespace CoReality.Avatars
 
             print("Spawn Avatar End");
         }
+
+        /// <summary>
+        /// Populates the avatar list with the current avatars [0] is always local
+        /// </summary>
+        private void PopulateAvatarList()
+        {
+            _holoAvatars.Clear();
+            if (LocalAvatar != null)
+                _holoAvatars.Add(LocalAvatar);
+            _holoAvatars.AddRange(RemoteAvatars.Values);
+        }
+
+        #region Helper Functions
+
+        /// <summary>
+        /// Gets the origin-space center position between all of the
+        /// connected avatars using an encapsulating bounds
+        /// </summary>
+        public static Vector3 CenterBetweenAvatars()
+        {
+            if (HoloAvatars.Count > 0)
+            {
+                Bounds b = new Bounds(HoloAvatars[0].HeadLocalPosition, Vector3.zero);
+                for (int i = 0; i < HoloAvatars.Count; i++)
+                    b.Encapsulate(HoloAvatars[i].HeadLocalPosition);
+                return b.center;
+            }
+            return Vector3.zero;
+        }
+
+        #endregion
+
 
         #region PUN Callbacks
 
@@ -212,6 +258,7 @@ namespace CoReality.Avatars
                 avatar.Destroy();
             }
             _remoteAvatars.Clear();
+            PopulateAvatarList();
         }
 
         public void OnPlayerLeftRoom(Player otherPlayer)
@@ -223,6 +270,7 @@ namespace CoReality.Avatars
             _onAvatarDestroyed?.Invoke(avatar);
             avatar.Destroy();
             _remoteAvatars.Remove(otherPlayer.ActorNumber);
+            PopulateAvatarList();
         }
 
         public void OnEvent(EventData photonEvent)
