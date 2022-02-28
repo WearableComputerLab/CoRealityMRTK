@@ -43,7 +43,7 @@ namespace CoReality.Avatars
             get => Instance._remoteAvatars;
         }
 
-        private List<HoloAvatar> _holoAvatars;
+        private List<HoloAvatar> _holoAvatars = new List<HoloAvatar>();
 
         /// <summary>
         /// Gets a list of all the current HoloAvatars in the scene
