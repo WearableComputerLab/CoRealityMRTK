@@ -172,7 +172,7 @@ namespace CoReality
                 {
                     IsOpen = true,
                     IsVisible = true,
-                    MaxPlayers = 0,
+                    MaxPlayers = 6,
                     PublishUserId = true,
                     CleanupCacheOnLeave = true
                 },

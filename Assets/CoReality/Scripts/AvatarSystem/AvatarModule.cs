@@ -84,7 +84,7 @@ namespace CoReality.Avatars
         "Vague",
         "Rare",
         "Jolly"
-    };
+        };
 
         [SerializeField]
         private List<string> _randomNouns = new List<string>{
@@ -103,7 +103,7 @@ namespace CoReality.Avatars
         "Calculator",
         "Texture",
         "Force"
-    };
+        };
 
         [SerializeField]
         private List<Color> _randomColors = new List<Color>{
@@ -113,7 +113,7 @@ namespace CoReality.Avatars
         Color.blue,
         Color.cyan,
         Color.magenta,
-    };
+        };
 
         //--------------------------------------
 
@@ -202,9 +202,12 @@ namespace CoReality.Avatars
             //Set color
             _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
                                 + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
-            _localAvatar.Color = _randomColors[UnityEngine.Random.Range(0, _randomColors.Count)];
 
-            print("Spawn Avatar End");
+            //Set the avatar's color to the actor number
+            int actorNum = PhotonNetwork.LocalPlayer.ActorNumber;
+            if (actorNum >= 0) //Ensure not -1
+                _localAvatar.Color = _randomColors[PhotonNetwork.LocalPlayer.ActorNumber];
+
         }
 
         /// <summary>
