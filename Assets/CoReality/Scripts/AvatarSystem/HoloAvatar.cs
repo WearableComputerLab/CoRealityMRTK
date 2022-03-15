@@ -51,6 +51,7 @@ namespace CoReality.Avatars
             }
         }
 
+        [SerializeField]
         private Color _color;
 
         /// <summary>

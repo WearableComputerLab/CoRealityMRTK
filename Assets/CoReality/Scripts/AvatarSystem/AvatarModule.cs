@@ -6,6 +6,7 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using System;
 using UnityEngine.Events;
+using Photon.Pun.UtilityScripts;
 
 namespace CoReality.Avatars
 {
@@ -138,6 +139,9 @@ namespace CoReality.Avatars
         {
             Instance = this;
 
+            //Create PlayerNumbering gameobject
+            new GameObject("PlayerNumberingUtil").AddComponent<Photon.Pun.UtilityScripts.PlayerNumbering>();
+
             //Check for network module (Ensure this is after NetworkModule in Script Execution Order)
             if (!NetworkModule.Instance)
                 throw new System.Exception("NetworkModule not present in scene? Can't start AvatarModule without it.");
@@ -180,6 +184,13 @@ namespace CoReality.Avatars
                     );
                     _onAvatarCreated?.Invoke(avatar);
                     PopulateAvatarList();
+
+                    //Set color
+                    _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
+                                        + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
+
+                    //Add listener to player number change
+                    PlayerNumbering.OnPlayerNumberingChanged += PlayerColorChanged;
                 }
                 else
                 {
@@ -199,16 +210,16 @@ namespace CoReality.Avatars
             //Forward property change event
             avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
 
-            //Set color
-            _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
-                                + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
-
-            //Set the avatar's color to the actor number
-            int actorNum = PhotonNetwork.LocalPlayer.ActorNumber;
-            if (actorNum >= 0) //Ensure not -1
-                _localAvatar.Color = _randomColors[PhotonNetwork.LocalPlayer.ActorNumber];
-
         }
+
+        private void PlayerColorChanged()
+        {
+            //Set color
+            _localAvatar.Color = _randomColors[PhotonNetwork.LocalPlayer.GetPlayerNumber()];
+            //Remove listener
+            PlayerNumbering.OnPlayerNumberingChanged -= PlayerColorChanged;
+        }
+
 
         /// <summary>
         /// Populates the avatar list with the current avatars [0] is always local
