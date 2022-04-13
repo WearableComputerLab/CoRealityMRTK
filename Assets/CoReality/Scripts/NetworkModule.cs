@@ -22,6 +22,9 @@ namespace CoReality
         [SerializeField, Tooltip("Automatically connect to the Photon network, if false you must call Connect() yourself.")]
         protected bool _autoConnect = true;
 
+        [SerializeField, Tooltip("Automatically rejoins the server and room on disconnect")]
+        protected bool _autoReconnect = true;
+
         [SerializeField, Tooltip("Your Photon cloud app id.")]
         protected string _appID = "";
 
@@ -139,28 +142,28 @@ namespace CoReality
         #region  PUN Callbacks
 
         public void OnFriendListUpdate(List<FriendInfo> friendList)
-        {}
+        { }
 
         public void OnCreatedRoom()
-        {}
+        { }
 
         public void OnCreateRoomFailed(short returnCode, string message)
-        {}
+        { }
 
         public void OnJoinedRoom()
-        {}
+        { }
 
         public void OnJoinRoomFailed(short returnCode, string message)
-        {}
+        { }
 
         public void OnJoinRandomFailed(short returnCode, string message)
-        {}
+        { }
 
         public void OnLeftRoom()
-        {}
+        { }
 
         public void OnConnected()
-        {}
+        { }
 
         public void OnConnectedToMaster()
         {
@@ -174,7 +177,9 @@ namespace CoReality
                     IsVisible = true,
                     MaxPlayers = 6,
                     PublishUserId = true,
-                    CleanupCacheOnLeave = true
+                    CleanupCacheOnLeave = true,
+                    PlayerTtl = 10000,
+                    EmptyRoomTtl = 20000,
                 },
                 TypedLobby.Default
             );

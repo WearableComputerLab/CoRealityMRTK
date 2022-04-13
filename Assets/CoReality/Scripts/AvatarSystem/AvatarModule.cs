@@ -158,10 +158,11 @@ namespace CoReality.Avatars
         /// <param name="viewID"> the avatar's view idea, only needed for remote spawning</param>
         private void SpawnAvatar(bool remote, int viewID = -1)
         {
-            print("Spawn Avatar Start");
             //spawn local avatar
             HoloAvatar avatar = Instantiate(_holoAvatarPrefab);
             avatar.Initalize(remote);
+            //Forward property change event to static event so interface can listen to it
+            avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
 
             //If the avatar is local, raise event to create a remote version for everyone else
             if (!remote)
@@ -184,17 +185,14 @@ namespace CoReality.Avatars
                     );
                     _onAvatarCreated?.Invoke(avatar);
                     PopulateAvatarList();
-
                     //Set color
                     _localAvatar.Name = _randomAdjectives[UnityEngine.Random.Range(0, _randomAdjectives.Count)] + " "
                                         + _randomNouns[UnityEngine.Random.Range(0, _randomNouns.Count)];
-
                     //Add listener to player number change
                     PlayerNumbering.OnPlayerNumberingChanged += PlayerColorChanged;
                 }
                 else
                 {
-                    Debug.LogError("Failed to allocate viewID for Avatar");
                     Destroy(_localAvatar.gameObject);
                 }
             }
@@ -206,10 +204,6 @@ namespace CoReality.Avatars
                 PopulateAvatarList();
                 _onAvatarCreated?.Invoke(avatar);
             }
-
-            //Forward property change event
-            avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
-
         }
 
         private void PlayerColorChanged()
@@ -289,9 +283,12 @@ namespace CoReality.Avatars
 
         public void OnEvent(EventData photonEvent)
         {
-            print("On Event");
+            Debug.Log("Recieved OnEvent call byte: " + photonEvent.Code.ToString());
             if (photonEvent.Code == AVATAR_EVENT)
+            {
+                Debug.Log("OnEvent call for avatar spawning");
                 SpawnAvatar(true, (int)photonEvent.CustomData);
+            }
         }
 
         //Unused 

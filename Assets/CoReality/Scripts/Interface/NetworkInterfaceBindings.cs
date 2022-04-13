@@ -78,7 +78,7 @@ namespace CoReality
                 {
                     UserItem item = Instantiate(_userItemPrefab);
                     item.Color = avatar.Color;
-                    item.Name = "test";
+                    item.Name = avatar.Name;
                     _userLayout.AddItem(item.RectTransform);
                     _userItems.Add(avatar, item);
                 });

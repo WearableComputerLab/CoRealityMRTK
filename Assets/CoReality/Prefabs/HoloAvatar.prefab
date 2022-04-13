@@ -47,7 +47,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
@@ -67,6 +67,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f81de692108bcb44f8557aa51a52a2cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _color: {r: 0, g: 0, b: 0, a: 0}
   _headPrefab: {fileID: 188356091292654235, guid: 93960069315e80043965819b0d042690,
     type: 3}
   _lHandPrefab: {fileID: 7484379840888929860, guid: 87810b9e069215946b759353eb732a3e,

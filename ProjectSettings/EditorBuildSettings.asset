@@ -6,9 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/CoReality/Examples/1 Networked Object/1 Networked Object.unity
-    guid: f50610625c8ade24e87bc6de74eca77b
-  - enabled: 1
     path: Assets/CoReality/Examples/2 Hololens Avatars/2 Hololens Avatars.unity
     guid: f0a2ab1031f83e64e84ecdbc62bfe8fb
   m_configObjects: {}

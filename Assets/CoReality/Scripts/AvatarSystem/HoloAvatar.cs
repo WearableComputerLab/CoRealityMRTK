@@ -154,6 +154,9 @@ namespace CoReality.Avatars
             _onPropertyChanged?.Invoke(property, value);
         }
 
+
+        private bool _sendDelay = false;
+
         void Awake()
         {
         }
@@ -207,11 +210,22 @@ namespace CoReality.Avatars
             }
 
             _isInitalized = true;
+
             return this;
+        }
+
+        IEnumerator SendDelayRoutine()
+        {
+            Debug.Log("Waiting for send delay");
+            yield return new WaitForSecondsRealtime(10);
+            Debug.Log("Send delay = true");
+            _sendDelay = true;
         }
 
         void Update()
         {
+            if (!_isInitalized) return;
+
             //Ensure in photon room else reset and return
             if (!PhotonNetwork.InRoom)
             {
@@ -220,10 +234,13 @@ namespace CoReality.Avatars
             }
 
             //Serialize data if owner, else deserialize it
-            if (IsLocal)
+            if (IsLocal && PhotonNetwork.CurrentRoom.PlayerCount > 1)
+            {
                 this.SerializeData();
+            }
             else if (_streamQueue.HasQueuedObjects())
                 this.DeserializeData();
+
         }
 
         private void SerializeData()
@@ -244,9 +261,6 @@ namespace CoReality.Avatars
                     _lHandRef.transform.position = left.AvatarRiggedHands.Root.position;
                     _lHandRef.transform.rotation = left.AvatarRiggedHands.Root.rotation;
                     HandPose pose = new HandPose(left.AvatarRiggedHands, _lHandRef.transform.localPosition, _lHandRef.transform.localRotation);
-
-
-
 
                     _streamQueue.SendNext(pose);
                 }

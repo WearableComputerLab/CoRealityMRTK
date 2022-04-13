@@ -1526,6 +1526,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AvatarModule
       objectReference: {fileID: 0}
+    - target: {fileID: 1670236776112054620, guid: a396d593cb08dcd409038903be4b5007,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1670236776112054621, guid: a396d593cb08dcd409038903be4b5007,
         type: 3}
       propertyPath: _enableHands
