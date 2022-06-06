@@ -283,10 +283,8 @@ namespace CoReality.Avatars
 
         public void OnEvent(EventData photonEvent)
         {
-            Debug.Log("Recieved OnEvent call byte: " + photonEvent.Code.ToString());
             if (photonEvent.Code == AVATAR_EVENT)
             {
-                Debug.Log("OnEvent call for avatar spawning");
                 SpawnAvatar(true, (int)photonEvent.CustomData);
             }
         }

@@ -87,7 +87,7 @@ namespace Microsoft.MixedReality.Toolkit
         {
             get
             {
-                Debug.Assert(isEnabled.HasValue, $"{GetType()} has not set a value for IsEnabled, returning false.");
+                // Debug.Assert(isEnabled.HasValue, $"{GetType()} has not set a value for IsEnabled, returning false.");
                 return isEnabled ?? false;
             }
 

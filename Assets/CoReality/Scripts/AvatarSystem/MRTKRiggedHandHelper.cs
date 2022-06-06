@@ -12,6 +12,12 @@ namespace CoReality.Avatars
         [SerializeField]
         public AvatarRiggedHand AvatarRiggedHands;
 
+        //Reference to the left hand helper if it exists
+        private static MRTKRiggedHandHelper _leftHelperRef;
+
+        //Reference to the right hand helper if it exists
+        private static MRTKRiggedHandHelper _rightHelperRef;
+
         /// <summary>
         /// Trys to get the rigged hands from MRTK
         /// returns true if atleast one hand is found,
@@ -22,24 +28,42 @@ namespace CoReality.Avatars
         public static bool TryGetRiggedHands(out MRTKRiggedHandHelper leftHand, out MRTKRiggedHandHelper rightHand)
         {
             leftHand = rightHand = default(MRTKRiggedHandHelper);
-            MRTKRiggedHandHelper[] riggedHands = (MRTKRiggedHandHelper[])GameObject.FindObjectsOfType<MRTKRiggedHandHelper>();
-            if (riggedHands.Length > 0)
+            try
             {
-                if (riggedHands[0].AvatarRiggedHands.Handedness == Handedness.Left)
-                    leftHand = riggedHands[0];
-                else
-                    rightHand = riggedHands[0];
+                if (_leftHelperRef != null)
+                    leftHand = _leftHelperRef;
+                if (_rightHelperRef != null)
+                    rightHand = _rightHelperRef;
 
-                if (riggedHands.Length > 1)
+                //Early out if the reference hasn't been destroyed
+                if (leftHand != null || rightHand != null)
+                    return true;
+
+                //Search for objects of Type MRTKRiggedHandHelper
+                MRTKRiggedHandHelper[] riggedHands = (MRTKRiggedHandHelper[])GameObject.FindObjectsOfType<MRTKRiggedHandHelper>();
+                if (riggedHands.Length > 0)
                 {
-                    if (riggedHands[1].AvatarRiggedHands.Handedness == Handedness.Left)
-                        leftHand = riggedHands[1];
+                    if (riggedHands[0].AvatarRiggedHands.Handedness == Handedness.Left)
+                        leftHand = _leftHelperRef = riggedHands[0];
                     else
-                        rightHand = riggedHands[1];
+                        rightHand = _rightHelperRef = riggedHands[0];
+
+                    if (riggedHands.Length > 1)
+                    {
+                        if (riggedHands[1].AvatarRiggedHands.Handedness == Handedness.Left)
+                            leftHand = _leftHelperRef = riggedHands[1];
+                        else
+                            rightHand = _rightHelperRef = riggedHands[1];
+                    }
+                    return true;
                 }
-                return true;
+                return false;
             }
-            return false;
+            catch (Exception e)
+            {
+                Debug.LogError("Failed to get rigged hands: " + e);
+                return false;
+            }
         }
 
     }
