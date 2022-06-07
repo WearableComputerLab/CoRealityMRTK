@@ -33,6 +33,10 @@ namespace CoReality.Avatars
             get => Instance._localAvatar;
         }
 
+        [SerializeField] private HoloAvatar.ControllerType _localControllerType;
+
+        public static HoloAvatar.ControllerType LocalControllerType { get => Instance._localControllerType; }
+
         private Dictionary<int, HoloAvatar> _remoteAvatars = new Dictionary<int, HoloAvatar>();
 
         /// <summary>
@@ -156,15 +160,15 @@ namespace CoReality.Avatars
         /// </summary>
         /// <param name="remote">flag to spawn a remote or local avatar</param>
         /// <param name="viewID"> the avatar's view idea, only needed for remote spawning</param>
-        private void SpawnAvatar(bool remote, int viewID = -1)
+        private void SpawnAvatar(bool remote, int viewID = -1, HoloAvatar.ControllerType cType = HoloAvatar.ControllerType.Hands)
         {
             //spawn local avatar
             HoloAvatar avatar = Instantiate(_holoAvatarPrefab);
-            avatar.Initalize(remote);
+            avatar.Initalize(remote, cType);
             //Forward property change event to static event so interface can listen to it
             avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
 
-            //If the avatar is local, raise event to create a remote version for everyone else
+            //If the avatar is local, raise event to cre.ate a remote version for everyone else
             if (!remote)
             {
                 _localAvatar = avatar;
@@ -172,7 +176,7 @@ namespace CoReality.Avatars
                 {
                     PhotonNetwork.RaiseEvent(
                         AVATAR_EVENT,
-                        _localAvatar.photonView.ViewID,
+                        new int[2] { _localAvatar.photonView.ViewID, ((int)cType) },
                         new RaiseEventOptions
                         {
                             Receivers = ReceiverGroup.Others,
@@ -252,7 +256,7 @@ namespace CoReality.Avatars
         public void OnJoinedRoom()
         {
             //Spawn local avatar
-            SpawnAvatar(false);
+            SpawnAvatar(false, -1, _localControllerType);
         }
 
         public void OnLeftRoom()
@@ -283,9 +287,12 @@ namespace CoReality.Avatars
 
         public void OnEvent(EventData photonEvent)
         {
+            Debug.Log("Recieved OnEvent call byte: " + photonEvent.Code.ToString());
             if (photonEvent.Code == AVATAR_EVENT)
             {
-                SpawnAvatar(true, (int)photonEvent.CustomData);
+                Debug.Log("OnEvent call for avatar spawning");
+                int[] customData = (int[])photonEvent.CustomData;
+                SpawnAvatar(true, customData[0], (HoloAvatar.ControllerType)customData[1]);
             }
         }
 

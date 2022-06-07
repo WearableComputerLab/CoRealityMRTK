@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.Events;
+using DisplayProp = CoReality.Avatars.AvatarPeripheralVisualiser.DisplayProp;
 
 namespace CoReality.Avatars
 {
@@ -11,6 +12,8 @@ namespace CoReality.Avatars
     [RequireComponent(typeof(PhotonView))]
     public class HoloAvatar : MonoBehaviourPun, IPunObservable
     {
+        public enum ControllerType { Hands, Controller }
+
         private bool _isInitalized = false;
 
         private bool _local = true;
@@ -78,8 +81,7 @@ namespace CoReality.Avatars
                 else
                 {
                     //If remote update the meshes
-                    _rightHand.MeshRenderer.material.color = value;
-                    _leftHand.MeshRenderer.material.color = value;
+                    _handVisualiser.SetDisplayProperty(DisplayProp.Color, value);
                     _head.GetComponentInChildren<MeshRenderer>().material.color = value;
                 }
             }
@@ -90,6 +92,12 @@ namespace CoReality.Avatars
         private PhotonStreamQueue _streamQueue = new PhotonStreamQueue(120);
 
         //---------------------------------
+
+        private ControllerType _controllerType;
+        public ControllerType HandControllerType
+        {
+            get => _controllerType;
+        }
 
         //Reference objects for local player 
         private GameObject _headRef, _lHandRef, _rHandRef;
@@ -122,23 +130,15 @@ namespace CoReality.Avatars
             }
         }
 
-        [SerializeField]
-        private AvatarRiggedHand _lHandPrefab;
-        private AvatarRiggedHand _leftHand;
+        /// <summary>
+        /// Reference to the component that will handle visualisation/synced view
+        /// of the avatar's hands or controllers.
+        /// </summary>
+        private AvatarPeripheralVisualiser _handVisualiser;
 
-        public AvatarRiggedHand LeftHand
-        {
-            get => _leftHand;
-        }
-
-        [SerializeField]
-        private AvatarRiggedHand _rHandPrefab;
-        private AvatarRiggedHand _rightHand;
-
-        public AvatarRiggedHand RightHand
-        {
-            get => _rightHand;
-        }
+        [Header("Hand Visualiser Prefabs")]
+        [SerializeField] private AvatarControllers _riggedHandsVisPrefab;
+        [SerializeField] private AvatarRiggedHands _controllersVisPrefab;
 
         //---------------------------------------------
 
@@ -172,9 +172,11 @@ namespace CoReality.Avatars
         /// <param name="remote"></param>
         /// <param name="parent"></param>
         /// <param name="color"></param>
-        public HoloAvatar Initalize(bool remote)
+        public HoloAvatar Initalize(bool remote, ControllerType cType = ControllerType.Hands)
         {
             _local = !remote;
+
+            _controllerType = cType;
 
             transform.SetParent(NetworkModule.NetworkOrigin);
             transform.localPosition = Vector3.zero;
@@ -182,6 +184,16 @@ namespace CoReality.Avatars
             transform.localScale = NetworkModule.NetworkOrigin.localScale;
 
             name = (remote ? "Remote" : "Local") + "Avatar";
+
+            // Instantiate hand visualiser component based on controller type
+            if (_controllerType == ControllerType.Hands)
+            {
+                _handVisualiser = Instantiate(_riggedHandsVisPrefab, transform);
+            }
+            else
+            {
+                _handVisualiser = Instantiate(_controllersVisPrefab, transform);
+            }
 
             if (IsLocal)
             {
@@ -193,20 +205,16 @@ namespace CoReality.Avatars
                 _lHandRef.transform.parent =
                 _rHandRef.transform.parent =
                 NetworkModule.NetworkOrigin;
+
+                // Set hand visualiser references
+                _handVisualiser.LHandRef = _lHandRef;
+                _handVisualiser.RHandRef = _rHandRef;
             }
             else
             {
                 //instantiate the remote objects for this avatar
                 _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
-                _rightHand = Instantiate(_rHandPrefab);
-                _leftHand = Instantiate(_lHandPrefab);
-                _rightHand.transform.SetParent(transform);
-                _leftHand.transform.SetParent(transform);
-                _rightHand.transform.localPosition = _leftHand.transform.localPosition = Vector3.zero;
-                _rightHand.transform.localRotation = _leftHand.transform.localRotation = Quaternion.identity;
-                //Set the default hand material if its not null
-                if (AvatarModule.DefaultHandMaterial)
-                    _rightHand.MeshRenderer.material = _leftHand.MeshRenderer.material = AvatarModule.DefaultHandMaterial;
+                _handVisualiser.InitRemoteHands();
             }
 
             _isInitalized = true;
@@ -245,78 +253,25 @@ namespace CoReality.Avatars
 
         private void SerializeData()
         {
-            //HEAD
+            // HEAD
             _headRef.transform.position = Camera.main.transform.position;
             _headRef.transform.rotation = Camera.main.transform.rotation;
 
             _streamQueue.SendNext(_headRef.transform.localPosition);
             _streamQueue.SendNext(_headRef.transform.localRotation);
 
-            //HANDS
-            MRTKRiggedHandHelper left, right;
-            if (MRTKRiggedHandHelper.TryGetRiggedHands(out left, out right))
-            {
-                if (left)
-                {
-                    _lHandRef.transform.position = left.AvatarRiggedHands.Root.position;
-                    _lHandRef.transform.rotation = left.AvatarRiggedHands.Root.rotation;
-                    HandPose pose = new HandPose(left.AvatarRiggedHands, _lHandRef.transform.localPosition, _lHandRef.transform.localRotation);
-
-                    _streamQueue.SendNext(pose);
-                }
-                else
-                    _streamQueue.SendNext(new HandPose { IsLeft = true, IsActive = false });
-
-                if (right)
-                {
-                    _rHandRef.transform.position = right.AvatarRiggedHands.Root.position;
-                    _rHandRef.transform.rotation = right.AvatarRiggedHands.Root.rotation;
-                    HandPose pose = new HandPose(right.AvatarRiggedHands, _rHandRef.transform.localPosition, _rHandRef.transform.localRotation);
-                    _streamQueue.SendNext(pose);
-                }
-                else
-                    _streamQueue.SendNext(new HandPose { IsLeft = false, IsActive = false });
-            }
-            else
-            {
-                //Always send a hand pose even if we don't have hands active
-                _streamQueue.SendNext(new HandPose { IsLeft = true, IsActive = false });
-                _streamQueue.SendNext(new HandPose { IsLeft = false, IsActive = false });
-            }
+            // HANDS
+            _handVisualiser.SerializeData(_streamQueue);
         }
 
         private void DeserializeData()
         {
-            //HEAD
+            // HEAD
             _head.transform.localPosition = (Vector3)_streamQueue.ReceiveNext();
             _head.transform.localRotation = (Quaternion)_streamQueue.ReceiveNext();
 
-            //HANDS
-            HandPose leftPose = (HandPose)_streamQueue.ReceiveNext();
-            if (leftPose.IsActive)
-            {
-                if (!_leftHand.gameObject.activeInHierarchy)
-                    _leftHand.gameObject.SetActive(true);
-                _leftHand.ApplyPose(leftPose);
-            }
-            else
-            {
-                if (_leftHand.gameObject.activeInHierarchy)
-                    _leftHand.gameObject.SetActive(false);
-            }
-
-            HandPose rightPose = (HandPose)_streamQueue.ReceiveNext();
-            if (rightPose.IsActive)
-            {
-                if (!_rightHand.gameObject.activeInHierarchy)
-                    _rightHand.gameObject.SetActive(true);
-                _rightHand.ApplyPose(rightPose);
-            }
-            else
-            {
-                if (_rightHand.gameObject.activeInHierarchy)
-                    _rightHand.gameObject.SetActive(false);
-            }
+            // HANDS
+            _handVisualiser.DeserialiseData(_streamQueue);
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

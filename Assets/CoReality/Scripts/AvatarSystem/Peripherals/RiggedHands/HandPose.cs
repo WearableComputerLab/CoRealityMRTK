@@ -10,11 +10,8 @@ namespace CoReality.Avatars
     /// The minimum amount of data to send over the network for
     /// a hand pose
     /// </summary>
-    public class HandPose
+    public class HandPose : BasePose
     {
-        public bool IsLeft { get; set; } //1
-        public Vector3 Position { get; set; } //12
-        public Quaternion Rotation { get; set; } //Quat to prevent gimble lock //16
         public Vector3 Wrist { get; set; } //Eulers //12
         public Vector3 Middle1 { get; set; } //12
         public float Middle2 { get; set; } //Rot on X axis only //4
@@ -32,14 +29,6 @@ namespace CoReality.Avatars
         public Vector3 Pinky1 { get; set; } //12
         public float Pinky2 { get; set; } //4
         public float Pinky3 { get; set; } //4
-
-        /// <summary>
-        /// Determins if this hand is active or not, if false
-        /// then the client sending this data does not currently
-        /// have this hand visable;
-        /// </summary>
-        /// <value></value>
-        public bool IsActive { get; set; } //1
 
         /*
             number of bytes to serialize

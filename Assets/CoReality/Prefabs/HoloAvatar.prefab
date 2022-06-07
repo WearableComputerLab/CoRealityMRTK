@@ -68,9 +68,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _color: {r: 0, g: 0, b: 0, a: 0}
-  _headPrefab: {fileID: 188356091292654235, guid: 93960069315e80043965819b0d042690,
-    type: 3}
-  _lHandPrefab: {fileID: 7484379840888929860, guid: 87810b9e069215946b759353eb732a3e,
-    type: 3}
-  _rHandPrefab: {fileID: 6612896662364394402, guid: eb959223922b46d4f8fb4cc3bad4de5f,
-    type: 3}
+  _headPrefab: {fileID: 188356091292654235, guid: 93960069315e80043965819b0d042690, type: 3}
+  _riggedHandsVisPrefab: {fileID: 3844683589203121830, guid: 48e1f7722cf419c4ebcd67a2a1c39eac, type: 3}
+  _controllersVisPrefab: {fileID: 1431149661127327171, guid: 5df9e98077aca9d4f967ed80004316a6, type: 3}
