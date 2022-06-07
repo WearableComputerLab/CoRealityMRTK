@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -7,6 +7,8 @@ using ExitGames.Client.Photon;
 using System;
 using UnityEngine.Events;
 using Photon.Pun.UtilityScripts;
+using CoReality.Spectator;
+using System.Linq;
 
 namespace CoReality.Avatars
 {
@@ -20,26 +22,27 @@ namespace CoReality.Avatars
 
         public const byte AVATAR_EVENT = 0x60;
 
+        public const byte SPECTATOR_EVENT = 0x61;
 
         //------------------------------------
 
         /// <summary>
         /// The avatar for the local player
         /// </summary>
-        private HoloAvatar _localAvatar;
+        private AvatarBase _localAvatar;
 
-        public static HoloAvatar LocalAvatar
+        public static AvatarBase LocalAvatar
         {
             get => Instance._localAvatar;
         }
 
-        private Dictionary<int, HoloAvatar> _remoteAvatars = new Dictionary<int, HoloAvatar>();
+        private Dictionary<int, AvatarBase> _remoteAvatars = new Dictionary<int, AvatarBase>();
 
         /// <summary>
         /// List of remote avatars in the room, new avatars are added when another player joins the room
         /// Dictionary of actor number, HoloAvatar 
         /// </summary>
-        public static Dictionary<int, HoloAvatar> RemoteAvatars
+        public static Dictionary<int, AvatarBase> RemoteAvatars
         {
             get => Instance._remoteAvatars;
         }
@@ -47,7 +50,7 @@ namespace CoReality.Avatars
         private List<HoloAvatar> _holoAvatars = new List<HoloAvatar>();
 
         /// <summary>
-        /// Gets a list of all the current HoloAvatars in the scene
+        /// Gets a list of all the current HoloAvatars in the scene (not including spectators)
         /// </summary>
         /// <value></value>
         public static List<HoloAvatar> HoloAvatars
@@ -55,8 +58,18 @@ namespace CoReality.Avatars
             get => Instance._holoAvatars;
         }
 
+        private List<SpectatorAvatar> _spectatorAvatars = new List<SpectatorAvatar>();
+
+        public static List<SpectatorAvatar> SpectatorAvatars
+        {
+            get => Instance._spectatorAvatars;
+        }
+
         [SerializeField, Tooltip("The prefab for the hololens avatar")]
         private HoloAvatar _holoAvatarPrefab;
+
+        [SerializeField, Tooltip("The prefab for the spectator avatar")]
+        private SpectatorAvatar _specAvatarPrefab;
 
         [SerializeField, Tooltip("The default material for the avatar hands")]
         private Material _defaultHandMaterial;
@@ -64,6 +77,13 @@ namespace CoReality.Avatars
         public static Material DefaultHandMaterial
         {
             get => Instance._defaultHandMaterial;
+        }
+
+        private bool _isSpectator = false;
+
+        public static bool IsSpectator
+        {
+            get => Instance._isSpectator;
         }
 
         [Header("Uniqueness Generator")]
@@ -206,6 +226,59 @@ namespace CoReality.Avatars
             }
         }
 
+        /// <summary>
+        /// Spawns a spectator either remotely or locally
+        /// </summary>
+        /// <param name="remote"></param>
+        /// <param name="viewID"></param>
+        public void SpawnSpectator(bool remote, int viewID = -1)
+        {
+            SpectatorAvatar spectator = Instantiate(_specAvatarPrefab);
+            spectator.Initalize(remote);
+            spectator.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(spectator, prop, val); });
+
+            if (!remote)
+            {
+                _localAvatar = spectator;
+                if (PhotonNetwork.AllocateViewID(spectator.photonView))
+                {
+                    PhotonNetwork.RaiseEvent(
+                        SPECTATOR_EVENT,
+                        _localAvatar.photonView.ViewID,
+                        new RaiseEventOptions
+                        {
+                            Receivers = ReceiverGroup.Others,
+                            CachingOption = EventCaching.AddToRoomCache,
+                        },
+                        new SendOptions
+                        {
+                            DeliveryMode = DeliveryMode.Reliable
+                        }
+                    );
+                    _onAvatarCreated?.Invoke(spectator);
+                    PopulateAvatarList();
+
+                    //Update name and color to be spectator
+                    _localAvatar.Name = "Spectator";
+                    _localAvatar.Color = Color.gray;
+                }
+                else
+                {
+                    Destroy(spectator.gameObject);
+                }
+            }
+            else
+            {
+                spectator.photonView.ViewID = viewID;
+                _remoteAvatars.Add(spectator.photonView.OwnerActorNr, spectator);
+                PopulateAvatarList();
+                _onAvatarCreated?.Invoke(spectator);
+            }
+        }
+
+        /// <summary>
+        /// Yeah, same
+        /// </summary>
         private void PlayerColorChanged()
         {
             //Set color
@@ -214,23 +287,37 @@ namespace CoReality.Avatars
             PlayerNumbering.OnPlayerNumberingChanged -= PlayerColorChanged;
         }
 
-
         /// <summary>
         /// Populates the avatar list with the current avatars [0] is always local
         /// </summary>
         private void PopulateAvatarList()
         {
             _holoAvatars.Clear();
+            _spectatorAvatars.Clear();
+
+            //Local avatar could be a spectator
             if (LocalAvatar != null)
-                _holoAvatars.Add(LocalAvatar);
-            _holoAvatars.AddRange(RemoteAvatars.Values);
+            {
+                if (LocalAvatar is HoloAvatar localHolo)
+                    _holoAvatars.Add(localHolo);
+                if (LocalAvatar is SpectatorAvatar localSpec)
+                    _spectatorAvatars.Add(localSpec);
+            }
+
+            foreach (AvatarBase b in RemoteAvatars.Values)
+            {
+                if (b is HoloAvatar holo)
+                    _holoAvatars.Add(holo);
+                if (b is SpectatorAvatar spec)
+                    _spectatorAvatars.Add(spec);
+            }
         }
 
         #region Helper Functions
 
         /// <summary>
         /// Gets the origin-space center position between all of the
-        /// connected avatars using an encapsulating bounds
+        /// connected HoloAvatars using an encapsulating bounds
         /// </summary>
         public static Vector3 CenterBetweenAvatars()
         {
@@ -252,7 +339,15 @@ namespace CoReality.Avatars
         public void OnJoinedRoom()
         {
             //Spawn local avatar
-            SpawnAvatar(false);
+            if (SpectatorRig.Instance == null)
+            {
+                SpawnAvatar(false);
+            }
+            //Spawn spectator if module exists
+            else
+            {
+                SpawnSpectator(false);
+            }
         }
 
         public void OnLeftRoom()
@@ -287,6 +382,10 @@ namespace CoReality.Avatars
             {
                 SpawnAvatar(true, (int)photonEvent.CustomData);
             }
+            else if (photonEvent.Code == SPECTATOR_EVENT)
+            {
+                SpawnSpectator(true, (int)photonEvent.CustomData);
+            }
         }
 
         //Unused 
@@ -314,8 +413,8 @@ namespace CoReality.Avatars
     }
 
     [Serializable]
-    public class HoloAvatarEvent : UnityEvent<HoloAvatar> { }
+    public class HoloAvatarEvent : UnityEvent<AvatarBase> { }
 
-    public class HoloAvatarPropertyChanged : UnityEvent<HoloAvatar, string, object> { }
+    public class HoloAvatarPropertyChanged : UnityEvent<AvatarBase, string, object> { }
 
 }

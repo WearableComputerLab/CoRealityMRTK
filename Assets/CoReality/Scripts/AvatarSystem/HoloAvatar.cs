@@ -9,87 +9,9 @@ namespace CoReality.Avatars
 {
 
     [RequireComponent(typeof(PhotonView))]
-    public class HoloAvatar : MonoBehaviourPun, IPunObservable
+    public class HoloAvatar : AvatarBase
     {
-        private bool _isInitalized = false;
 
-        private bool _local = true;
-
-        /// <summary>
-        /// Is this HoloAvatar local or remote?
-        /// </summary>
-        /// <value></value>
-        public bool IsLocal
-        {
-            get => _local;
-        }
-
-        private string _name;
-
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                _name = value + (IsLocal ? " (you)" : "");
-                PropertyChanged(nameof(Name), Name);
-
-                //RPC to update color to others if locally changed
-                if (IsLocal)
-                {
-                    photonView.RPC(
-                        nameof(SetNameRPC),
-                        RpcTarget.OthersBuffered,
-                        value
-                    );
-                }
-                else
-                {
-                    //If remote set the name text above their head
-                    _head.Name = value;
-                }
-            }
-        }
-
-        [SerializeField]
-        private Color _color;
-
-        /// <summary>
-        /// Sets the color of this HoloAvatar, and updates on all clients
-        /// </summary>
-        /// <value></value>
-        public Color Color
-        {
-            get => _color;
-            set
-            {
-                _color = value;
-                PropertyChanged(nameof(Color), Color);
-
-                //RPC to update color to others if locally changed
-                if (IsLocal)
-                {
-                    photonView.RPC(
-                        nameof(SetColorRPC),
-                        RpcTarget.OthersBuffered,
-                        new Vector3(value.r, value.g, value.b)
-                    );
-                }
-                else
-                {
-                    //If remote update the meshes
-                    _rightHand.MeshRenderer.material.color = value;
-                    _leftHand.MeshRenderer.material.color = value;
-                    _head.GetComponentInChildren<MeshRenderer>().material.color = value;
-                }
-            }
-        }
-
-        //---------------------------------
-
-        private PhotonStreamQueue _streamQueue = new PhotonStreamQueue(120);
-
-        //---------------------------------
 
         //Reference objects for local player 
         private GameObject _headRef, _lHandRef, _rHandRef;
@@ -115,7 +37,7 @@ namespace CoReality.Avatars
         {
             get
             {
-                if (_local)
+                if (AmController)
                     return _headRef.transform.localPosition;
                 else
                     return _head.transform.localPosition;
@@ -142,29 +64,6 @@ namespace CoReality.Avatars
 
         //---------------------------------------------
 
-        private PropertyChangedEvent _onPropertyChanged = new PropertyChangedEvent();
-
-        public PropertyChangedEvent OnPropertyChanged
-        {
-            get => _onPropertyChanged;
-        }
-
-        private void PropertyChanged(string property, object value)
-        {
-            _onPropertyChanged?.Invoke(property, value);
-        }
-
-
-        private bool _sendDelay = false;
-
-        void Awake()
-        {
-        }
-
-        void Start()
-        {
-
-        }
 
         /// <summary>
         /// Initalize this HoloAvatar
@@ -172,10 +71,8 @@ namespace CoReality.Avatars
         /// <param name="remote"></param>
         /// <param name="parent"></param>
         /// <param name="color"></param>
-        public HoloAvatar Initalize(bool remote)
+        public override AvatarBase Initalize(bool remote)
         {
-            _local = !remote;
-
             transform.SetParent(NetworkModule.NetworkOrigin);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -183,7 +80,7 @@ namespace CoReality.Avatars
 
             name = (remote ? "Remote" : "Local") + "Avatar";
 
-            if (IsLocal)
+            if (remote)
             {
                 //Spawn the reference objects (for positioning)
                 _headRef = new GameObject("__HeadReference");
@@ -214,36 +111,8 @@ namespace CoReality.Avatars
             return this;
         }
 
-        IEnumerator SendDelayRoutine()
-        {
-            Debug.Log("Waiting for send delay");
-            yield return new WaitForSecondsRealtime(10);
-            Debug.Log("Send delay = true");
-            _sendDelay = true;
-        }
 
-        void Update()
-        {
-            if (!_isInitalized) return;
-
-            //Ensure in photon room else reset and return
-            if (!PhotonNetwork.InRoom)
-            {
-                _streamQueue.Reset();
-                return;
-            }
-
-            //Serialize data if owner, else deserialize it
-            if (IsLocal && PhotonNetwork.CurrentRoom.PlayerCount > 1)
-            {
-                this.SerializeData();
-            }
-            else if (_streamQueue.HasQueuedObjects())
-                this.DeserializeData();
-
-        }
-
-        private void SerializeData()
+        public override void SerializeData()
         {
             //HEAD
             _headRef.transform.position = Camera.main.transform.position;
@@ -285,7 +154,7 @@ namespace CoReality.Avatars
             }
         }
 
-        private void DeserializeData()
+        public override void DeserializeData()
         {
             //HEAD
             _head.transform.localPosition = (Vector3)_streamQueue.ReceiveNext();
@@ -319,23 +188,12 @@ namespace CoReality.Avatars
             }
         }
 
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            if (stream.IsWriting == true)
-            {
-                this._streamQueue.Serialize(stream);
-            }
-            else
-            {
-                this._streamQueue.Deserialize(stream);
-            }
-        }
 
-        public void Destroy()
+        public override void Destroy()
         {
             //Clean up all listeners
             _onPropertyChanged.RemoveAllListeners();
-            if (IsLocal)
+            if (AmController)
             {
                 Destroy(_headRef.gameObject);
                 Destroy(_lHandRef.gameObject);
@@ -346,52 +204,34 @@ namespace CoReality.Avatars
 
         #region RPCs
 
-        /// <summary>
-        /// Remotely set the color of this player
-        /// </summary>
-        /// <param name="color"></param>
-        [PunRPC]
-        void SetColorRPC(Vector3 color)
-        {
-            Color = new Color(color.x, color.y, color.z);
-        }
 
-        /// <summary>
-        /// Remotely sets the name of this player
-        /// </summary>
-        /// <param name="name"></param>
         [PunRPC]
-        void SetNameRPC(string name)
+        protected new void PropertyChangedRPC(string property, object value)
         {
-            Name = name;
-        }
+            base.PropertyChangedRPC(property, value);
 
-        /// <summary>
-        /// Remotely sets the scale of this player's avatar
-        /// </summary>
-        /// <param name="localScale"></param>
-        [PunRPC]
-        void SetScaleRPC(Vector3 localScale)
-        {
-            //Ensure we never set a local avatar's scale
-            if (!IsLocal)
+            //Todo use reflection to get prop names
+
+            switch (property)
             {
-
-
+                case nameof(Color):
+                    Vector3 hah = (Vector3)value;
+                    Color = new Color(hah.x, hah.y, hah.z);
+                    _rightHand.MeshRenderer.material.color = Color;
+                    _leftHand.MeshRenderer.material.color = Color;
+                    _head.GetComponentInChildren<MeshRenderer>().material.color = Color;
+                    break;
+                case nameof(Name):
+                    Name = (string)value;
+                    _head.Name = Name;
+                    break;
             }
         }
 
-        [PunRPC]
-        void PropertyChangedRPC(string property, object value)
-        {
-            //TODO: Implement if I added any more property RPCs
-        }
 
         #endregion
 
     }
 
-
-    public class PropertyChangedEvent : UnityEvent<string, object> { }
 
 }

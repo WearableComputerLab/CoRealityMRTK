@@ -45,6 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _holoAvatarPrefab: {fileID: 1903999165951379408, guid: 9de9b658f8438eb4ba2558fa58be17b2,
     type: 3}
+  _specAvatarPrefab: {fileID: 1340331663869578568, guid: c8a45afc5ecd16f46917f6d52f89fcf2,
+    type: 3}
   _defaultHandMaterial: {fileID: 2100000, guid: 00507b2f91f06a848a6aae5b479b33e8,
     type: 2}
   _randomAdjectives:

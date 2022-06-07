@@ -33,7 +33,7 @@ namespace CoReality
         [SerializeField]
         private UserItem _userItemPrefab;
 
-        private Dictionary<HoloAvatar, UserItem> _userItems = new Dictionary<HoloAvatar, UserItem>();
+        private Dictionary<AvatarBase, UserItem> _userItems = new Dictionary<AvatarBase, UserItem>();
 
         void Awake()
         {
@@ -90,7 +90,8 @@ namespace CoReality
                     {
                         case nameof(avatar.Color):
                             {
-                                _userItems[avatar].Color = (Color)val;
+                                Vector3 vec = (Vector3)val;
+                                _userItems[avatar].Color = new Color(vec.x, vec.y, vec.z);
                                 break;
                             }
                         case nameof(avatar.Name):
