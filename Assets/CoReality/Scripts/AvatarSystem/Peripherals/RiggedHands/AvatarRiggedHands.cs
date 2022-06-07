@@ -43,12 +43,12 @@ namespace CoReality.Avatars
 
         protected override HandPose CreatePose(AvatarRiggedHand peripheral, Transform reference)
         {
-            throw new System.NotImplementedException();
+            return new HandPose(peripheral, reference.position, reference.rotation);
         }
 
         protected override HandPose CreateEmptyPose(bool isLeft, bool isActive)
         {
-            throw new System.NotImplementedException();
+            return new HandPose();
         }
     }
 }
