@@ -180,6 +180,7 @@ namespace CoReality.Avatars
         {
             //spawn local avatar
             HoloAvatar avatar = Instantiate(_holoAvatarPrefab);
+
             avatar.Initalize(remote);
             //Forward property change event to static event so interface can listen to it
             avatar.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(avatar, prop, val); });
@@ -235,6 +236,7 @@ namespace CoReality.Avatars
         {
             SpectatorAvatar spectator = Instantiate(_specAvatarPrefab);
             spectator.Initalize(remote);
+
             spectator.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(spectator, prop, val); });
 
             if (!remote)
@@ -355,7 +357,7 @@ namespace CoReality.Avatars
             //Remove all avatars including self
             _localAvatar.Destroy();
             _localAvatar = null;
-            foreach (HoloAvatar avatar in _remoteAvatars.Values)
+            foreach (AvatarBase avatar in _remoteAvatars.Values)
             {
                 _onAvatarDestroyed?.Invoke(avatar);
                 avatar.Destroy();

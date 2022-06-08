@@ -59,23 +59,18 @@ namespace CoReality.Spectator
 
         void Update()
         {
-
         }
 
         public void InitalizeAvatar(SpectatorAvatar avatar)
         {
-
         }
 
         private void ProcessImage()
         {
-
-
         }
 
         public void OnPlayerEnteredRoom(Player newPlayer)
         {
-
         }
 
         public void OnPlayerLeftRoom(Player otherPlayer)

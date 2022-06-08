@@ -62,6 +62,8 @@ namespace CoReality.Avatars
             get => _rightHand;
         }
 
+        private bool _isRemote = false;
+
         //---------------------------------------------
 
 
@@ -73,6 +75,8 @@ namespace CoReality.Avatars
         /// <param name="color"></param>
         public override AvatarBase Initalize(bool remote)
         {
+            _isRemote = remote;
+
             transform.SetParent(NetworkModule.NetworkOrigin);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -80,8 +84,9 @@ namespace CoReality.Avatars
 
             name = (remote ? "Remote" : "Local") + "Avatar";
 
-            if (remote)
+            if (!remote)
             {
+                //Spawn Local reference objects
                 //Spawn the reference objects (for positioning)
                 _headRef = new GameObject("__HeadReference");
                 _lHandRef = new GameObject("__LeftHandReference");
@@ -93,6 +98,7 @@ namespace CoReality.Avatars
             }
             else
             {
+                //Spawn Remote Objects
                 //instantiate the remote objects for this avatar
                 _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
                 _rightHand = Instantiate(_rHandPrefab);
@@ -192,8 +198,12 @@ namespace CoReality.Avatars
         public override void Destroy()
         {
             //Clean up all listeners
-            _onPropertyChanged.RemoveAllListeners();
-            if (AmController)
+            OnPropertyChanged.RemoveAllListeners();
+            //We have to check isRemote here AmController won't work in this
+            //instance since controller switches to another player once connection
+            //is lost from the leaving player
+            //FIXME: Come up with a better solution for the above (but _isRemote works for now)
+            if (!_isRemote)
             {
                 Destroy(_headRef.gameObject);
                 Destroy(_lHandRef.gameObject);
@@ -206,12 +216,9 @@ namespace CoReality.Avatars
 
 
         [PunRPC]
-        protected new void PropertyChangedRPC(string property, object value)
+        protected override void PropertyChangedRPC(string property, object value)
         {
-            base.PropertyChangedRPC(property, value);
-
             //Todo use reflection to get prop names
-
             switch (property)
             {
                 case nameof(Color):

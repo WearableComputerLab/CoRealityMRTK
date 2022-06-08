@@ -17,8 +17,8 @@ namespace CoReality.Examples
             print("Loading Desktop Scene");
             SceneManager.LoadScene(1, LoadSceneMode.Additive);
 #else
-        print("Loading Hololens Scene");
-        SceneManager.LoadScene(2, LoadSceneMode.Additive);
+            print("Loading Hololens Scene");
+            SceneManager.LoadScene(2, LoadSceneMode.Additive);
 #endif
         }
     }

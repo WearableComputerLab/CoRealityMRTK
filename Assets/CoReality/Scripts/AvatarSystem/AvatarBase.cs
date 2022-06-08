@@ -30,7 +30,7 @@ namespace CoReality.Avatars
             set
             {
                 _name = value + (AmController ? " (you)" : "");
-                PropertyChanged(nameof(Name), Name);
+                PropertyChanged(nameof(Name), value);
             }
         }
 
@@ -123,9 +123,7 @@ namespace CoReality.Avatars
         /// <summary>
         /// Ensure you call base if this is overriden
         /// </summary>
-        [PunRPC]
-        protected void PropertyChangedRPC(string property, object value)
-        { }
+        protected abstract void PropertyChangedRPC(string property, object value);
 
         #endregion
 

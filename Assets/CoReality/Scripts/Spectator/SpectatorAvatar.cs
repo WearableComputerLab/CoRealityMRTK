@@ -7,25 +7,27 @@ namespace CoReality.Spectator
     public class SpectatorAvatar : AvatarBase
     {
 
+        [SerializeField]
         private GameObject _cameraModel;
 
         public override AvatarBase Initalize(bool remote)
         {
             transform.SetParent(NetworkModule.NetworkOrigin);
 
-            //Just place where the spectator is
-            transform.localPosition = SpectatorRig.Instance.transform.localPosition;
-            transform.localRotation = SpectatorRig.Instance.transform.localRotation;
+            name = (remote ? "Remote" : "Local") + "Spectator";
 
-            if (remote)
+            if (!remote)
             {
-                //For now just create a primative to indicate the location
-                _cameraModel = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                _cameraModel.name = "Spectator Indicator";
-                _cameraModel.transform.parent = NetworkModule.NetworkOrigin;
-                _cameraModel.transform.localPosition = transform.localPosition;
+                //Disable camera model reference
+                _cameraModel.gameObject.SetActive(false);
+                //Just place where the spectator is
+                transform.localPosition = SpectatorRig.Instance.transform.localPosition;
+                transform.localRotation = SpectatorRig.Instance.transform.localRotation;
             }
-            else { }
+            else
+            {
+                //Do nothing for now (Rig just sits in static position)
+            }
 
             _isInitalized = true;
 
@@ -34,24 +36,26 @@ namespace CoReality.Spectator
 
         public override void SerializeData()
         {
-
+            _streamQueue.SendNext(transform.localPosition);
+            _streamQueue.SendNext(transform.localRotation);
         }
 
         public override void DeserializeData()
         {
-
+            transform.localPosition = (Vector3)_streamQueue.ReceiveNext();
+            transform.localRotation = (Quaternion)_streamQueue.ReceiveNext();
         }
 
         public override void Destroy()
         {
-
+            //Clean up all listeners
+            OnPropertyChanged.RemoveAllListeners();
+            Destroy(gameObject);
         }
 
         [PunRPC]
-        protected new void PropertyChangedRPC(string property, object value)
+        protected override void PropertyChangedRPC(string property, object value)
         {
-            base.PropertyChangedRPC(property, value);
-
             switch (property)
             {
                 case nameof(Color):
