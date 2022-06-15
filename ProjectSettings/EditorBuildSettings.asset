@@ -5,10 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/CoReality/Examples/5 Spectator View/5.1 Spectator View (Desktop).unity
-    guid: cb97cb92cbbb86c449add1c6f7009d7e
   - enabled: 1
-    path: Assets/CoReality/Examples/5 Spectator View/5.2 Spectator View (Hololens).unity
-    guid: 62a04c901101b584ebf6242c24e9bcb2
+    path: Assets/CoReality/Examples/2 Hololens Avatars/2 Hololens Avatars.unity
+    guid: f0a2ab1031f83e64e84ecdbc62bfe8fb
   m_configObjects: {}

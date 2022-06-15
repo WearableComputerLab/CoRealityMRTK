@@ -36,7 +36,7 @@ namespace CoReality.Avatars
                     rightHand = _rightHelperRef;
 
                 //Early out if the reference hasn't been destroyed
-                if (leftHand != null || rightHand != null)
+                if (leftHand != null && rightHand != null)
                     return true;
 
                 //Search for objects of Type MRTKRiggedHandHelper

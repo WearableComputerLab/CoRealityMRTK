@@ -66,7 +66,6 @@ namespace CoReality.Avatars
 
         //---------------------------------------------
 
-
         /// <summary>
         /// Initalize this HoloAvatar
         /// </summary>
