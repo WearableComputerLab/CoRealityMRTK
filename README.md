@@ -2,6 +2,26 @@
   <img src="./images/logo.png" />
 </p>
 
+## OZMap VR Version Experimental Branch 
+
+This branch contains changes to Coreality implemented as part of the [OZMap project](https://github.com/WearableComputerLab/OZMap/):
+
+- Extension of the HoloAvatar to enable representation of either XR controllers or tracked hands. 
+- Addition of a "AvatarNetBehaviour" component system enabling custom modular network behaviour on the HoloAvatar GameObject.
+- Map based behaviours from OZMap included for reference (requires OZMap to compile):
+  - **MapAvatarBehaviour**: Applies custom positioning/scaling of the HoloAvatar based on each user's relative map position/zoom. 
+  - **MapPointerAvatarBehaviour**: Syncs remote HoloAvatar hand ControllerPointer components with the user's local ControllerPointers (laser pointer function). 
+  - **MapAnnotationAvatarBehaviour**: Syncs user's local AnnotationModule state so that freehand annotation drawings are synced across each client. Annotation line segments are anchored to the map and are map position/zoom relative.
+- Prefabs:
+  - VR Holo Avatar
+  - VR Left/Right Controllers
+  - VR Remote Left/Right Controllers
+  - Drawing Segment (AnnotationModule)
+  - Ground Indicator
+  - Controller Pointer
+
+---
+
 ## Requirements
 
 Unity version 2019.4 LTS or greater
