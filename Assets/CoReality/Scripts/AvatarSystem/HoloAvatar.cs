@@ -5,10 +5,21 @@ using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.Events;
 using DisplayProp = CoReality.Avatars.AvatarPeripheralVisualiser.DisplayProp;
+using OZMap;
+using Mapbox.Utils;
+using System.Linq;
 
 namespace CoReality.Avatars
 {
 
+    /// <summary>
+    /// Handles both local and remote user avatar representations, including head and 
+    /// controller/hand tracking and transmission. 
+    /// 
+    /// Modified for OZMap by Jack Fraser:
+    /// - Extrapolated hand/controller tracking.
+    /// - Added AvatarBehaviour component system.
+    /// </summary>
     [RequireComponent(typeof(PhotonView))]
     public class HoloAvatar : MonoBehaviourPun, IPunObservable
     {
@@ -82,7 +93,8 @@ namespace CoReality.Avatars
                 {
                     //If remote update the meshes
                     _handVisualiser.SetDisplayProperty(DisplayProp.Color, value);
-                    _head.GetComponentInChildren<MeshRenderer>().material.color = value;
+                    _head.GetComponentInChildren<MeshRenderer>().materials[1].color = value;
+                    foreach (AvatarNetBehaviour beh in _avatarBehaviours) beh.SetAvatarColor(value);
                 }
             }
         }
@@ -93,7 +105,7 @@ namespace CoReality.Avatars
 
         //---------------------------------
 
-        private ControllerType _controllerType;
+        [SerializeField] private ControllerType _controllerType;
         public ControllerType HandControllerType
         {
             get => _controllerType;
@@ -130,6 +142,16 @@ namespace CoReality.Avatars
             }
         }
 
+        public Vector3 HeadWorldPos
+        {
+            get
+            {
+                if (_local)
+                    return _headRef.transform.position;
+                else
+                    return _head.transform.position;
+            }
+        }
         /// <summary>
         /// Reference to the component that will handle visualisation/synced view
         /// of the avatar's hands or controllers.
@@ -137,8 +159,10 @@ namespace CoReality.Avatars
         private AvatarPeripheralVisualiser _handVisualiser;
 
         [Header("Hand Visualiser Prefabs")]
-        [SerializeField] private AvatarControllers _riggedHandsVisPrefab;
-        [SerializeField] private AvatarRiggedHands _controllersVisPrefab;
+        [SerializeField] private AvatarRiggedHands _riggedHandsVisPrefab;
+        [SerializeField] private AvatarControllers _controllersVisPrefab;
+
+        public AvatarPeripheralVisualiser HandVisualiser { get => _handVisualiser; }
 
         //---------------------------------------------
 
@@ -156,6 +180,8 @@ namespace CoReality.Avatars
 
 
         private bool _sendDelay = false;
+
+        private List<AvatarNetBehaviour> _avatarBehaviours = new List<AvatarNetBehaviour>();
 
         void Awake()
         {
@@ -178,6 +204,9 @@ namespace CoReality.Avatars
 
             _controllerType = cType;
 
+            _avatarBehaviours.AddRange(GetComponents<AvatarNetBehaviour>());
+            _avatarBehaviours = _avatarBehaviours.OrderBy(x => x.ExecutionOrder).ToList();
+
             transform.SetParent(NetworkModule.NetworkOrigin);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -185,36 +214,36 @@ namespace CoReality.Avatars
 
             name = (remote ? "Remote" : "Local") + "Avatar";
 
-            // Instantiate hand visualiser component based on controller type
-            if (_controllerType == ControllerType.Hands)
-            {
-                _handVisualiser = Instantiate(_riggedHandsVisPrefab, transform);
-            }
-            else
-            {
-                _handVisualiser = Instantiate(_controllersVisPrefab, transform);
-            }
+            AvatarPeripheralVisualiser peripheralPrefab;
+            if (_controllerType == ControllerType.Hands) peripheralPrefab = _riggedHandsVisPrefab;
+            else peripheralPrefab = _controllersVisPrefab;
 
             if (IsLocal)
             {
                 //Spawn the reference objects (for positioning)
                 _headRef = new GameObject("__HeadReference");
-                _lHandRef = new GameObject("__LeftHandReference");
-                _rHandRef = new GameObject("__RightHandReference");
-                _headRef.transform.parent =
-                _lHandRef.transform.parent =
-                _rHandRef.transform.parent =
-                NetworkModule.NetworkOrigin;
+                _headRef.transform.parent = NetworkModule.NetworkOrigin;
 
-                // Set hand visualiser references
-                _handVisualiser.LHandRef = _lHandRef;
-                _handVisualiser.RHandRef = _rHandRef;
+                _handVisualiser = Instantiate(peripheralPrefab, _headRef.transform);
+                _handVisualiser.InitLocal(_headRef.transform);
+
+                foreach (AvatarNetBehaviour behaviour in _avatarBehaviours)
+                {
+                    behaviour.InitLocal(this);
+                }
             }
             else
             {
                 //instantiate the remote objects for this avatar
                 _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
-                _handVisualiser.InitRemoteHands();
+
+                _handVisualiser = Instantiate(peripheralPrefab, _head.transform);
+                _handVisualiser.InitRemote();
+
+                foreach (AvatarNetBehaviour behaviour in _avatarBehaviours)
+                {
+                    behaviour.InitRemote(this);
+                }
             }
 
             _isInitalized = true;
@@ -242,7 +271,7 @@ namespace CoReality.Avatars
             }
 
             //Serialize data if owner, else deserialize it
-            if (IsLocal && PhotonNetwork.CurrentRoom.PlayerCount > 1)
+            if (IsLocal && PhotonNetwork.CurrentRoom.PlayerCount > 0)
             {
                 this.SerializeData();
             }
@@ -262,6 +291,12 @@ namespace CoReality.Avatars
 
             // HANDS
             _handVisualiser.SerializeData(_streamQueue);
+
+            // BEHAVIOURS 
+            foreach (AvatarNetBehaviour behaviour in _avatarBehaviours)
+            {
+                behaviour.SerializeData(_streamQueue);
+            }
         }
 
         private void DeserializeData()
@@ -271,7 +306,13 @@ namespace CoReality.Avatars
             _head.transform.localRotation = (Quaternion)_streamQueue.ReceiveNext();
 
             // HANDS
-            _handVisualiser.DeserialiseData(_streamQueue);
+            _handVisualiser.DeserializeData(_streamQueue);
+
+            // BEHAVIOURS 
+            foreach (AvatarNetBehaviour behaviour in _avatarBehaviours)
+            {
+                behaviour.DeserializeData(_streamQueue);
+            }
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -293,10 +334,66 @@ namespace CoReality.Avatars
             if (IsLocal)
             {
                 Destroy(_headRef.gameObject);
-                Destroy(_lHandRef.gameObject);
-                Destroy(_rHandRef.gameObject);
+                // Destroy(_lHandRef.gameObject);
+                // Destroy(_rHandRef.gameObject);
             }
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Adds and registers a new AvatarNetBehaviour derived component to this HoloAvatar
+        /// and GameObject.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddAvatarBehaviour<T>(int executionOrder = 0) where T : AvatarNetBehaviour
+        {
+            T behaviour = gameObject.AddComponent(typeof(T)) as T;
+            _avatarBehaviours.Add(behaviour);
+            _avatarBehaviours = _avatarBehaviours.OrderBy(x => x.ExecutionOrder).ToList();
+            return behaviour;
+        }
+
+        /// <summary>
+        /// Attempts to remove a given AvatarNetBehaviour if it exists on this HoloAvatar.
+        /// </summary>
+        /// <param name="behaviour"></param>
+        /// <returns></returns>
+        public bool RemoveAvatarBehaviour(AvatarNetBehaviour behaviour)
+        {
+            if (_avatarBehaviours.Contains(behaviour))
+            {
+                _avatarBehaviours.Remove(behaviour);
+                _avatarBehaviours = _avatarBehaviours.OrderBy(x => x.ExecutionOrder).ToList();
+                return true;
+            }
+            else return false;
+        }
+
+        /// <summary>
+        /// Attempts to remove all registered AvatarNetBehaviours of type T if they exist on this
+        /// HoloAvatar.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool RemoveAvatarBehaviour<T>() where T : AvatarNetBehaviour
+        {
+            bool foundRemove = false;
+            for (int i = _avatarBehaviours.Count - 1; i >= 0; i--)
+            {
+                AvatarNetBehaviour behaviour = _avatarBehaviours[i];
+                if (behaviour is T)
+                {
+                    _avatarBehaviours.RemoveAt(i);
+                    _avatarBehaviours = _avatarBehaviours.OrderBy(x => x.ExecutionOrder).ToList();
+                    if (foundRemove)
+                    {
+                        Debug.LogWarning($"Multiple AvatarNetBehaviours of type {typeof(T).Name} found, removing...");
+                    }
+                    foundRemove = true;
+                }
+            }
+            return foundRemove;
         }
 
         #region RPCs

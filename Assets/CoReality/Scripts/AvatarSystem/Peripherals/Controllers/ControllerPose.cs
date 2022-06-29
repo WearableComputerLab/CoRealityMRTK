@@ -55,8 +55,8 @@ namespace CoReality.Avatars
         /// <returns></returns>
         public static byte[] SerializeControllerPose(object customObject)
         {
-            HandPose pose = (HandPose)customObject;
-            byte[] bytes = new byte[28];
+            ControllerPose pose = (ControllerPose)customObject;
+            byte[] bytes = new byte[30];
 
             bytes[0] = BitConverter.GetBytes(pose.IsLeft)[0];
 
@@ -70,7 +70,7 @@ namespace CoReality.Avatars
             Buffer.BlockCopy(BitConverter.GetBytes(pose.Rotation.z), 0, bytes, 21, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(pose.Rotation.w), 0, bytes, 25, 4);
 
-            bytes[27] = BitConverter.GetBytes(pose.IsActive)[0];
+            bytes[29] = BitConverter.GetBytes(pose.IsActive)[0];
 
             return bytes;
         }
@@ -96,7 +96,7 @@ namespace CoReality.Avatars
                 BitConverter.ToSingle(bytes, 25)
             );
 
-            pose.IsActive = BitConverter.ToBoolean(bytes, 27);
+            pose.IsActive = BitConverter.ToBoolean(bytes, 29);
 
             return pose;
         }

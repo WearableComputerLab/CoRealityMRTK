@@ -24,12 +24,15 @@ namespace CoReality.Avatars
 
         protected GameObject _lHandRef, _rHandRef;
 
+        public abstract AvatarPeripheral LeftPeripheral { get; }
+        public abstract AvatarPeripheral RightPeripheral { get; }
         public GameObject LHandRef { get => _lHandRef; set => _lHandRef = value; }
         public GameObject RHandRef { get => _rHandRef; set => _rHandRef = value; }
 
-        public abstract void InitRemoteHands();
+        public abstract void InitLocal(Transform headRef);
+        public abstract void InitRemote();
         public abstract void SerializeData(PhotonStreamQueue _streamQueue);
-        public abstract void DeserialiseData(PhotonStreamQueue _streamQueue);
+        public abstract void DeserializeData(PhotonStreamQueue _streamQueue);
         public abstract void SetDisplayProperty(DisplayProp prop, object value);
 
     }

@@ -36,7 +36,12 @@ namespace CoReality.Avatars
             get => _rightHand;
         }
 
-        public override void InitRemoteHands()
+        public override AvatarPeripheral LeftPeripheral { get => _leftHand; }
+        public override AvatarPeripheral RightPeripheral { get => _rightHand; }
+
+        private Transform _headRef;
+
+        public override void InitRemote()
         {
             _rightHand = Instantiate(_rHandPrefab);
             _leftHand = Instantiate(_lHandPrefab);
@@ -44,6 +49,15 @@ namespace CoReality.Avatars
             _leftHand.transform.SetParent(transform);
             _rightHand.transform.localPosition = _leftHand.transform.localPosition = Vector3.zero;
             _rightHand.transform.localRotation = _leftHand.transform.localRotation = Quaternion.identity;
+        }
+
+        public override void InitLocal(Transform headRef)
+        {
+            _headRef = headRef;
+            _lHandRef = new GameObject("__LeftHandReference");
+            _rHandRef = new GameObject("__RightHandReference");
+            _lHandRef.transform.parent = _headRef;
+            _rHandRef.transform.parent = _headRef;
         }
 
         public override void SerializeData(PhotonStreamQueue _streamQueue)
@@ -77,7 +91,7 @@ namespace CoReality.Avatars
             }
         }
 
-        public override void DeserialiseData(PhotonStreamQueue _streamQueue)
+        public override void DeserializeData(PhotonStreamQueue _streamQueue)
         {
             U leftPose = (U)_streamQueue.ReceiveNext();
             if (leftPose.IsActive)

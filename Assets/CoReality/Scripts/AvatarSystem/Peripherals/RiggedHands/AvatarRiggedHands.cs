@@ -16,9 +16,9 @@ namespace CoReality.Avatars
     public class AvatarRiggedHands : TypedAvatarPeripheralVisualiser<AvatarRiggedHand, HandPose>
     {
 
-        public override void InitRemoteHands()
+        public override void InitRemote()
         {
-            base.InitRemoteHands();
+            base.InitRemote();
 
             //Set the default hand material if its not null
             if (AvatarModule.DefaultHandMaterial)
@@ -43,7 +43,7 @@ namespace CoReality.Avatars
 
         protected override HandPose CreatePose(AvatarRiggedHand peripheral, Transform reference)
         {
-            return new HandPose(peripheral, reference.position, reference.rotation);
+            return new HandPose(peripheral, reference.localPosition, reference.localRotation);
         }
 
         protected override HandPose CreateEmptyPose(bool isLeft, bool isActive)

@@ -7,6 +7,7 @@ using ExitGames.Client.Photon;
 using System;
 using UnityEngine.Events;
 using Photon.Pun.UtilityScripts;
+using OZMap;
 
 namespace CoReality.Avatars
 {
@@ -152,6 +153,7 @@ namespace CoReality.Avatars
 
             //Add HandPose to Photon's known serializable data types
             PhotonPeer.RegisterType(typeof(HandPose), 0x68, HandPose.SerializeHandPose, HandPose.DeserializeHandPose);
+            PhotonPeer.RegisterType(typeof(ControllerPose), 0x69, ControllerPose.SerializeControllerPose, ControllerPose.DeserializeControllerPose);
             PhotonNetwork.AddCallbackTarget(this);
         }
 
@@ -214,6 +216,7 @@ namespace CoReality.Avatars
         {
             //Set color
             _localAvatar.Color = _randomColors[PhotonNetwork.LocalPlayer.GetPlayerNumber()];
+            OZMapAppState.instance.PlayerColor = _localAvatar.Color;
             //Remove listener
             PlayerNumbering.OnPlayerNumberingChanged -= PlayerColorChanged;
         }
@@ -279,10 +282,17 @@ namespace CoReality.Avatars
             if (otherPlayer.ActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 return;
             var avatar = _remoteAvatars[otherPlayer.ActorNumber];
-            _onAvatarDestroyed?.Invoke(avatar);
-            avatar.Destroy();
-            _remoteAvatars.Remove(otherPlayer.ActorNumber);
-            PopulateAvatarList();
+            if (avatar != null)
+            {
+                _onAvatarDestroyed?.Invoke(avatar);
+                avatar.Destroy();
+                _remoteAvatars.Remove(otherPlayer.ActorNumber);
+                PopulateAvatarList();
+            }
+            else
+            {
+                Debug.LogError("Player left but no corresponding avatar found");
+            }
         }
 
         public void OnEvent(EventData photonEvent)

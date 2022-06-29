@@ -15,14 +15,16 @@ namespace CoReality.Avatars
     /// </summary>
     public class AvatarControllers : TypedAvatarPeripheralVisualiser<AvatarController, ControllerPose>
     {
-
-        public override void InitRemoteHands()
+        public override void InitRemote()
         {
-            base.InitRemoteHands();
+            base.InitRemote();
 
             //Set the default hand material if its not null
             if (AvatarModule.DefaultHandMaterial)
-                _rightHand.MeshRenderer.material = _leftHand.MeshRenderer.material = AvatarModule.DefaultHandMaterial;
+            {
+                _leftHand.SetMaterial(AvatarModule.DefaultHandMaterial);
+                _rightHand.SetMaterial(AvatarModule.DefaultHandMaterial);
+            }
         }
 
         public override void SetDisplayProperty(DisplayProp prop, object value)
@@ -31,8 +33,8 @@ namespace CoReality.Avatars
             {
                 case DisplayProp.Color:
                     Color color = (Color)value;
-                    _rightHand.MeshRenderer.material.color = color;
-                    _leftHand.MeshRenderer.material.color = color;
+                    _leftHand.SetColour(color);
+                    _rightHand.SetColour(color);
                     break;
 
                 case DisplayProp.Scale:
