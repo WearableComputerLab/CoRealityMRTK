@@ -4,18 +4,19 @@ using UnityEngine;
 using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.Events;
+using Photon.Voice.PUN;
+using Photon.Voice.Unity;
 
 namespace CoReality.Avatars
 {
-
-    [RequireComponent(typeof(PhotonView))]
+    [RequireComponent(
+        typeof(PhotonView),
+        typeof(PhotonVoiceView)
+    )]
     public class HoloAvatar : AvatarBase
     {
-
-
         //Reference objects for local player 
         private GameObject _headRef, _lHandRef, _rHandRef;
-
 
         //Remote avatar objects, only created for remote HoloAvatars
 
@@ -62,7 +63,14 @@ namespace CoReality.Avatars
             get => _rightHand;
         }
 
+        [SerializeField, Tooltip("The speaker prefab")]
+        private Speaker _speakerPrefab;
+
+        private Speaker _speaker;
+
         private bool _isRemote = false;
+
+        private PhotonVoiceView _photonVoiceView;
 
         //---------------------------------------------
 
@@ -81,6 +89,9 @@ namespace CoReality.Avatars
             transform.localRotation = Quaternion.identity;
             transform.localScale = NetworkModule.NetworkOrigin.localScale;
 
+            //get photonVoiceView
+            _photonVoiceView = GetComponent<PhotonVoiceView>();
+
             name = (remote ? "Remote" : "Local") + "Avatar";
 
             if (!remote)
@@ -94,18 +105,27 @@ namespace CoReality.Avatars
                 _lHandRef.transform.parent =
                 _rHandRef.transform.parent =
                 NetworkModule.NetworkOrigin;
+
             }
             else
             {
                 //Spawn Remote Objects
                 //instantiate the remote objects for this avatar
                 _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
+
+                //Create speaker for remote user (local avatars dont need a speaker)
+                _speaker = Instantiate(_speakerPrefab, Vector3.zero, Quaternion.identity);
+                _photonVoiceView.SpeakerInUse = _speaker;
+                _speaker.transform.parent = _head.transform;
+
+                //instantiate hands
                 _rightHand = Instantiate(_rHandPrefab);
                 _leftHand = Instantiate(_lHandPrefab);
                 _rightHand.transform.SetParent(transform);
                 _leftHand.transform.SetParent(transform);
                 _rightHand.transform.localPosition = _leftHand.transform.localPosition = Vector3.zero;
                 _rightHand.transform.localRotation = _leftHand.transform.localRotation = Quaternion.identity;
+
                 //Set the default hand material if its not null
                 if (AvatarModule.DefaultHandMaterial)
                     _rightHand.MeshRenderer.material = _leftHand.MeshRenderer.material = AvatarModule.DefaultHandMaterial;
@@ -115,7 +135,6 @@ namespace CoReality.Avatars
 
             return this;
         }
-
 
         public override void SerializeData()
         {

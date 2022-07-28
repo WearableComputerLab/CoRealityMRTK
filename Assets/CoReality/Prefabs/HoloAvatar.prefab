@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1903999165951379409}
   - component: {fileID: 1903999165951379415}
+  - component: {fileID: -5545638934099833392}
   - component: {fileID: 1903999165951379408}
   m_Layer: 0
   m_Name: HoloAvatar
@@ -55,6 +56,25 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &-5545638934099833392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903999165951379410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 126494ae2a10a34499272ed97a6c9f5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logLevel: 2
+  ignoreGlobalLogLevel: 0
+  recorderInUse: {fileID: 0}
+  speakerInUse: {fileID: 0}
+  AutoCreateRecorderIfNotFound: 0
+  UsePrimaryRecorder: 1
+  SetupDebugSpeaker: 0
 --- !u!114 &1903999165951379408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,10 +87,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f81de692108bcb44f8557aa51a52a2cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 0, g: 0, b: 0, a: 0}
   _headPrefab: {fileID: 188356091292654235, guid: 93960069315e80043965819b0d042690,
     type: 3}
   _lHandPrefab: {fileID: 7484379840888929860, guid: 87810b9e069215946b759353eb732a3e,
     type: 3}
   _rHandPrefab: {fileID: 6612896662364394402, guid: eb959223922b46d4f8fb4cc3bad4de5f,
+    type: 3}
+  _speakerPrefab: {fileID: 3816600508971301033, guid: a62936b7c4db4de428195556877fbbb7,
     type: 3}

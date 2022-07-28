@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.Events;
 using ExitGames.Client.Photon;
+using Photon.Voice.PUN;
 
 namespace CoReality
 {
@@ -13,6 +14,7 @@ namespace CoReality
     /// <summary>
     /// Handles the connection side of the photon networking
     /// </summary>
+    [RequireComponent(typeof(PhotonVoiceNetwork))]
     public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCallbacks, IInRoomCallbacks
     {
         public static NetworkModule Instance;
@@ -24,9 +26,6 @@ namespace CoReality
 
         [SerializeField, Tooltip("Automatically rejoins the server and room on disconnect")]
         protected bool _autoReconnect = true;
-
-        [SerializeField, Tooltip("Your Photon cloud app id.")]
-        protected string _appID = "";
 
         [SerializeField, Tooltip("The photon cloud region to use.")]
         protected string _region;
@@ -83,13 +82,20 @@ namespace CoReality
 
         private bool _vuforiaTargetFound = false;
 
+        private PhotonVoiceNetwork _photonVoiceNetwork;
+
         void Awake()
         {
             Instance = this;
             //Ensure this is target for photon callbacks
             PhotonNetwork.AddCallbackTarget(this);
+            //Get the voice network instance
+            _photonVoiceNetwork = GetComponent<PhotonVoiceNetwork>();
             //Create the Network origin object
             _networkOriginObject = new GameObject("__ORIGIN__");
+            //Position origin over the vuforia marker, so all _attachedObjects are relative
+            if (_vuforiaTarget)
+                _networkOriginObject.transform.position = _vuforiaTarget.transform.position;
             //Attach objects
             foreach (GameObject go in _attachedObjects)
                 go.transform.SetParent(NetworkOrigin);
@@ -123,7 +129,8 @@ namespace CoReality
                 return;
             var setting = new Photon.Realtime.AppSettings()
             {
-                AppIdRealtime = Instance._appID,
+                //pull app id from appSettings since we have to put the voice app id anyway
+                AppIdRealtime = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime,
                 FixedRegion = Instance._region,
                 Protocol = ConnectionProtocol.Udp,
                 EnableProtocolFallback = true,
