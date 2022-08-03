@@ -24,10 +24,6 @@ namespace CoReality.Spectator
                 transform.localPosition = SpectatorRig.Instance.transform.localPosition;
                 transform.localRotation = SpectatorRig.Instance.transform.localRotation;
             }
-            else
-            {
-                //Do nothing for now (Rig just sits in static position)
-            }
 
             _isInitalized = true;
 
@@ -36,6 +32,10 @@ namespace CoReality.Spectator
 
         public override void SerializeData()
         {
+            //Follow the rig position
+            transform.localPosition = SpectatorRig.Instance.transform.localPosition;
+            transform.localRotation = SpectatorRig.Instance.transform.localRotation;
+
             _streamQueue.SendNext(transform.localPosition);
             _streamQueue.SendNext(transform.localRotation);
         }
