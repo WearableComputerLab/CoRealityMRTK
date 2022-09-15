@@ -37,7 +37,7 @@ namespace CoReality
         /// and all users will be aligned around that position
         /// On hololens this is the user's inital head position when the launch the application.
         /// </summary>
-        protected DefaultTrackableEventHandler _vuforiaTarget;
+        protected DefaultObserverEventHandler _vuforiaTarget;
 
         [SerializeField, Tooltip("An array of objects that are automatically attached to the networked origin transform at runtime.")]
         /// <summary>
