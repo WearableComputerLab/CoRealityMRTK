@@ -28,6 +28,16 @@ namespace CoReality.Avatars
         Pointer1, Pointer2, Pointer3, Ring1, Ring2, Ring3, Thumb1, Thumb2, Thumb3,
         WristPadding, Pinky1, Pinky2, Pinky3;
 
+        /// <summary>
+        /// Sets this hands color
+        /// </summary>
+        /// <param name="color"></param>
+        public void SetColor(Color color)
+        {
+            //Set the rim color on the skinned mesh material
+            MeshRenderer.material.SetColor("_RimColor", color);
+        }
+
         public void ApplyPose(HandPose pose)
         {
             Root.transform.localPosition = pose.Position;

@@ -279,7 +279,7 @@ namespace CoReality.Avatars
         }
 
         /// <summary>
-        /// Yeah, same
+        /// Listener for player number change event
         /// </summary>
         private void PlayerColorChanged()
         {

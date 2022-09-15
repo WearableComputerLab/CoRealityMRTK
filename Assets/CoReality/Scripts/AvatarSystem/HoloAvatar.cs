@@ -223,11 +223,12 @@ namespace CoReality.Avatars
             switch (property)
             {
                 case nameof(Color):
-                    Vector3 hah = (Vector3)value;
-                    Color = new Color(hah.x, hah.y, hah.z);
-                    _rightHand.MeshRenderer.material.color = Color;
-                    _leftHand.MeshRenderer.material.color = Color;
-                    _head.GetComponentInChildren<MeshRenderer>().material.color = Color;
+                    //Update the color of remote objects
+                    Vector3 v3Color = (Vector3)value;
+                    Color = new Color(v3Color.x, v3Color.y, v3Color.z);
+                    _rightHand.SetColor(Color);
+                    _leftHand.SetColor(Color);
+                    _head.SetColor(Color);
                     break;
                 case nameof(Name):
                     Name = (string)value;

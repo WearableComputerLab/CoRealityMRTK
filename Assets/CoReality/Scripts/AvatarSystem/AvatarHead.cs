@@ -11,6 +11,10 @@ namespace CoReality.Avatars
     /// </summary>
     public class AvatarHead : MonoBehaviour
     {
+
+        [SerializeField, Tooltip("The MeshRenderer attached to this AvatarHead")]
+        private MeshRenderer _meshRenderer;
+
         private string _name;
 
         /// <summary>
@@ -27,13 +31,12 @@ namespace CoReality.Avatars
             }
         }
 
-
         [SerializeField]
         private TextMeshPro _nameText;
 
-        void Awake()
+        public void SetColor(Color color)
         {
-
+            _meshRenderer.material.SetColor("_RimColor", color);
         }
     }
 

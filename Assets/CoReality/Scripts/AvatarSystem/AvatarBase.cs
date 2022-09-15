@@ -46,6 +46,8 @@ namespace CoReality.Avatars
             set
             {
                 _color = value;
+
+                //
                 //Have to convert color to Vector3 so it can be sent over photonNetwork
                 PropertyChanged(nameof(Color), new Vector3(value.r, value.g, value.b));
             }
@@ -64,16 +66,15 @@ namespace CoReality.Avatars
 
         /// <summary>
         /// Invokes onPropertyChanged event for local updates
-        /// And Invokes PropertyChangedRPC for remote objects
-        /// only if the object IsLocal
+        /// And Invokes PropertyChangedRPC for remote updates
         /// </summary>
         /// <param name="property"></param>
         /// <param name="value"></param>
         protected void PropertyChanged(string property, object value)
         {
-            //Update local event (this will update interface binding)
+            //Update locally this will call OnAvatarPropertyChanged in AvatarModule
             _onPropertyChanged?.Invoke(property, value);
-            //Invoke property change RPC
+            //Invoke property change RPC if we are controller
             if (AmController)
             {
                 photonView.RPC(
