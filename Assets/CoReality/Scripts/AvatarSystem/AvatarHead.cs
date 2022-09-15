@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Photon.Voice.Unity;
 
 namespace CoReality.Avatars
 {
@@ -28,30 +27,13 @@ namespace CoReality.Avatars
             }
         }
 
-        /// <summary>
-        /// Shows or hides the speaker indicator object
-        /// </summary>
-        public bool SetSpeaking
-        {
-            set
-            {
-                _speakerIndicator.SetActive(value);
-            }
-        }
 
         [SerializeField]
         private TextMeshPro _nameText;
 
-        [SerializeField]
-        private GameObject _speakerIndicator;
-
-        [SerializeField, Tooltip("Photon speaker for voice communication")]
-        private Speaker _speaker;
-
         void Awake()
         {
-            //Initalize speaking false
-            SetSpeaking = false;
+
         }
     }
 

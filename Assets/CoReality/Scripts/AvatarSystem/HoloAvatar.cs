@@ -4,14 +4,11 @@ using UnityEngine;
 using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.Events;
-using Photon.Voice.PUN;
-using Photon.Voice.Unity;
 
 namespace CoReality.Avatars
 {
     [RequireComponent(
-        typeof(PhotonView),
-        typeof(PhotonVoiceView)
+        typeof(PhotonView)
     )]
     public class HoloAvatar : AvatarBase
     {
@@ -63,14 +60,7 @@ namespace CoReality.Avatars
             get => _rightHand;
         }
 
-        [SerializeField, Tooltip("The speaker prefab")]
-        private Speaker _speakerPrefab;
-
-        private Speaker _speaker;
-
         private bool _isRemote = false;
-
-        private PhotonVoiceView _photonVoiceView;
 
         //---------------------------------------------
 
@@ -89,8 +79,6 @@ namespace CoReality.Avatars
             transform.localRotation = Quaternion.identity;
             transform.localScale = NetworkModule.NetworkOrigin.localScale;
 
-            //get photonVoiceView
-            _photonVoiceView = GetComponent<PhotonVoiceView>();
 
             name = (remote ? "Remote" : "Local") + "Avatar";
 
@@ -112,11 +100,6 @@ namespace CoReality.Avatars
                 //Spawn Remote Objects
                 //instantiate the remote objects for this avatar
                 _head = Instantiate(_headPrefab, Vector3.zero, Quaternion.identity, transform);
-
-                //Create speaker for remote user (local avatars dont need a speaker)
-                _speaker = Instantiate(_speakerPrefab, Vector3.zero, Quaternion.identity);
-                _photonVoiceView.SpeakerInUse = _speaker;
-                _speaker.transform.parent = _head.transform;
 
                 //instantiate hands
                 _rightHand = Instantiate(_rHandPrefab);

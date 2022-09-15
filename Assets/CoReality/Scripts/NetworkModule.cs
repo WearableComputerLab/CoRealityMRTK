@@ -6,7 +6,6 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.Events;
 using ExitGames.Client.Photon;
-using Photon.Voice.PUN;
 
 namespace CoReality
 {
@@ -14,7 +13,6 @@ namespace CoReality
     /// <summary>
     /// Handles the connection side of the photon networking
     /// </summary>
-    [RequireComponent(typeof(PhotonVoiceNetwork))]
     public class NetworkModule : MonoBehaviour, IMatchmakingCallbacks, IConnectionCallbacks, IInRoomCallbacks
     {
         public static NetworkModule Instance;
@@ -82,15 +80,13 @@ namespace CoReality
 
         private bool _vuforiaTargetFound = false;
 
-        private PhotonVoiceNetwork _photonVoiceNetwork;
 
         void Awake()
         {
             Instance = this;
             //Ensure this is target for photon callbacks
             PhotonNetwork.AddCallbackTarget(this);
-            //Get the voice network instance
-            _photonVoiceNetwork = GetComponent<PhotonVoiceNetwork>();
+
             //Create the Network origin object
             _networkOriginObject = new GameObject("__ORIGIN__");
             //Position origin over the vuforia marker, so all _attachedObjects are relative
