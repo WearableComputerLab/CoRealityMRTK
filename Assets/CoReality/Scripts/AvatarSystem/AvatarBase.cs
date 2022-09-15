@@ -130,6 +130,8 @@ namespace CoReality.Avatars
 
         public abstract AvatarBase Initalize(bool remote);
 
+        public abstract Transform GetHeadTransform();
+
         public abstract void SerializeData();
 
         public abstract void DeserializeData();

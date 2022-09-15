@@ -61,7 +61,7 @@ namespace CoReality
 
             EditorGUILayout.Separator();
 
-            EditorGUILayout.LabelField("Vuforia >=9.8.8", labelStyle);
+            EditorGUILayout.LabelField("Vuforia >=10.1.4", labelStyle);
             if (!_hasVuforia)
             {
                 EditorGUILayoutExtensions.LinkLabel("Download here", Color.blue, Vector2.zero, 14, "https://developer.vuforia.com/downloads/sdk");

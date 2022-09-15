@@ -8,9 +8,6 @@ using CoReality.Avatars;
 
 namespace CoReality
 {
-
-
-
     /// <summary>
     /// Interface bindings for the network interface
     /// </summary>
@@ -25,6 +22,12 @@ namespace CoReality
 
         [SerializeField]
         private Button _quitButton;
+
+        [SerializeField]
+        private Button _connectionButton;
+
+        [SerializeField]
+        private TextMeshProUGUI _connectionButtonText;
 
         //Requires AvatarModule
         [SerializeField]
@@ -48,66 +51,85 @@ namespace CoReality
                 Application.Quit();
             });
 
-            // if (NetworkModule.Instance)
+            _connectionButton?.onClick.AddListener(() =>
             {
-
-                NetworkModule.OnConnectedEvent.AddListener(() =>
+                _connectionButton.interactable = false;
+                if (PhotonNetwork.IsConnected)
                 {
-                    if (_connStatusText)
-                    {
-                        _connStatusText.text = "Connected";
-                        _connStatusText.color = Color.green;
-                    }
-                });
-
-                NetworkModule.OnDisconnectedEvent.AddListener(() =>
+                    NetworkModule.Disconnect();
+                }
+                else
                 {
-                    if (_connStatusText)
-                    {
-                        _connStatusText.text = "Disconnected";
-                        _connStatusText.color = Color.red;
-                    }
-                });
+                    NetworkModule.Connect();
+                }
+            });
 
-            }
-
-            // if (AvatarModule.Instance)
+            //Listen to connected event
+            NetworkModule.OnConnectedEvent.AddListener(() =>
             {
-                //Listen to avatar created event
-                AvatarModule.OnAvatarCreated.AddListener((avatar) =>
+                if (_connStatusText)
                 {
-                    UserItem item = Instantiate(_userItemPrefab);
-                    item.Color = avatar.Color;
-                    item.Name = avatar.Name;
-                    _userLayout.AddItem(item.RectTransform);
-                    _userItems.Add(avatar, item);
-                });
+                    _connStatusText.text = "Connected";
+                    _connStatusText.color = Color.green;
+                }
+                if (_connectionButtonText)
+                    _connectionButtonText.text = "Disconnect";
 
-                //Listen to Avatar property change events
-                AvatarModule.OnAvatarPropertyChanged.AddListener((avatar, prop, val) =>
-                {
-                    switch (prop)
-                    {
-                        case nameof(avatar.Color):
-                            {
-                                Vector3 vec = (Vector3)val;
-                                _userItems[avatar].Color = new Color(vec.x, vec.y, vec.z);
-                                break;
-                            }
-                        case nameof(avatar.Name):
-                            {
-                                _userItems[avatar].Name = (string)val;
-                                break;
-                            }
-                    }
-                });
+                if (_connectionButton)
+                    _connectionButton.interactable = true;
+            });
 
-                //Listen to avatar destroyed events
-                AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
+            //Listen to disconnected event
+            NetworkModule.OnDisconnectedEvent.AddListener(() =>
+            {
+                if (_connStatusText)
                 {
-                    _userLayout.RemoveItem(_userItems[avatar].RectTransform);
-                });
-            }
+                    _connStatusText.text = "Disconnected";
+                    _connStatusText.color = Color.red;
+                }
+                if (_connectionButtonText)
+                    _connectionButtonText.text = "Connect";
+
+                if (_connectionButton)
+                    _connectionButton.interactable = true;
+            });
+
+
+            //Listen to avatar created event
+            AvatarModule.OnAvatarCreated.AddListener((avatar) =>
+            {
+                UserItem item = Instantiate(_userItemPrefab);
+                item.Color = avatar.Color;
+                item.Name = avatar.Name;
+                _userLayout.AddItem(item.RectTransform);
+                _userItems.Add(avatar, item);
+            });
+
+            //Listen to Avatar property change events
+            AvatarModule.OnAvatarPropertyChanged.AddListener((avatar, prop, val) =>
+            {
+                switch (prop)
+                {
+                    case nameof(avatar.Color):
+                        {
+                            Vector3 vec = (Vector3)val;
+                            _userItems[avatar].Color = new Color(vec.x, vec.y, vec.z);
+                            break;
+                        }
+                    case nameof(avatar.Name):
+                        {
+                            _userItems[avatar].Name = (string)val;
+                            break;
+                        }
+                }
+            });
+
+            //Listen to avatar destroyed events
+            AvatarModule.OnAvatarDestroyed.AddListener((avatar) =>
+            {
+                _userLayout.RemoveItem(_userItems[avatar].RectTransform);
+            });
+
         }
 
 

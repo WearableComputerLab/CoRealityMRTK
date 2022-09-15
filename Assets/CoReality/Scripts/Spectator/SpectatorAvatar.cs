@@ -30,6 +30,15 @@ namespace CoReality.Spectator
             return this;
         }
 
+        /// <summary>
+        /// Gets the Head Transform of this spectator
+        /// </summary>
+        /// <returns></returns>
+        public override Transform GetHeadTransform()
+        {
+            return transform;
+        }
+
         public override void SerializeData()
         {
             //Follow the rig position

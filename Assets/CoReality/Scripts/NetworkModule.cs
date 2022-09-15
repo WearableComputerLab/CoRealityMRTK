@@ -25,6 +25,9 @@ namespace CoReality
         [SerializeField, Tooltip("Automatically rejoins the server and room on disconnect")]
         protected bool _autoReconnect = true;
 
+        [SerializeField, Tooltip("Your Photon cloud app id.")]
+        protected string _appID = "";
+
         [SerializeField, Tooltip("The photon cloud region to use.")]
         protected string _region;
 
@@ -80,7 +83,6 @@ namespace CoReality
 
         private bool _vuforiaTargetFound = false;
 
-
         void Awake()
         {
             Instance = this;
@@ -126,7 +128,7 @@ namespace CoReality
             var setting = new Photon.Realtime.AppSettings()
             {
                 //pull app id from appSettings since we have to put the voice app id anyway
-                AppIdRealtime = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime,
+                AppIdRealtime = Instance._appID,
                 FixedRegion = Instance._region,
                 Protocol = ConnectionProtocol.Udp,
                 EnableProtocolFallback = true,

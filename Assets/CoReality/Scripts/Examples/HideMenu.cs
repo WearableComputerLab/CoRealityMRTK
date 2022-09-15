@@ -2,26 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HideMenu : MonoBehaviour
+
+namespace CoReality.Examples
 {
-
-    [SerializeField]
-    private KeyCode _hideKey = KeyCode.Tilde;
-
-    [SerializeField]
-    private GameObject[] _objectsToHide;
-
-    private bool _areActive = true;
-
-    void Update()
+    public class HideMenu : MonoBehaviour
     {
-        if(Input.GetKeyDown(_hideKey))
+
+        [SerializeField]
+        private KeyCode _hideKey = KeyCode.Tilde;
+
+        [SerializeField]
+        private GameObject[] _objectsToHide;
+
+        private bool _areActive = true;
+
+        void Update()
         {
-            _areActive = !_areActive;
-            for(int i = 0 ; i < _objectsToHide.Length;i++)
+            if (Input.GetKeyDown(_hideKey))
             {
-                _objectsToHide[i].SetActive(_areActive);
+                _areActive = !_areActive;
+                for (int i = 0; i < _objectsToHide.Length; i++)
+                {
+                    _objectsToHide[i].SetActive(_areActive);
+                }
             }
-        }        
+        }
     }
 }

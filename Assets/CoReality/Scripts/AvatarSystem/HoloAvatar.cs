@@ -93,7 +93,6 @@ namespace CoReality.Avatars
                 _lHandRef.transform.parent =
                 _rHandRef.transform.parent =
                 NetworkModule.NetworkOrigin;
-
             }
             else
             {
@@ -117,6 +116,18 @@ namespace CoReality.Avatars
             _isInitalized = true;
 
             return this;
+        }
+
+        /// <summary>
+        /// Gets the Head Transform of this HoloAvatar
+        /// </summary>
+        /// <returns></returns>
+        public override Transform GetHeadTransform()
+        {
+            if (_isRemote)
+                return Head.transform;
+            else
+                return Camera.main.transform;
         }
 
         public override void SerializeData()
