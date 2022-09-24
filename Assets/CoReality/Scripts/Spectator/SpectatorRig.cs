@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace CoReality.Spectator
 {
-
+    [RequireComponent(typeof(SpectatorMove))]
     public class SpectatorRig : MonoBehaviour
     {
 
@@ -40,9 +40,22 @@ namespace CoReality.Spectator
             get => _onWebcamChanged;
         }
 
+        private SpectatorMove _spectatorMove;
+
+        public SpectatorMove SpectatorMove
+        {
+            get
+            {
+                if(_spectatorMove == null)
+                    _spectatorMove = GetComponent<SpectatorMove>();
+                return _spectatorMove;
+            }
+        }
+
         void Awake()
         {
             Instance = this;
+            
         }
 
         void Start()

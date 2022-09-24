@@ -183,6 +183,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6037874268514658261}
   - component: {fileID: 6037874268514658260}
+  - component: {fileID: 4026049620559909624}
   m_Layer: 0
   m_Name: SpectatorRig
   m_TagString: Untagged
@@ -220,7 +221,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spectatorCamera: {fileID: 652874643895528812}
   _deviceToUse: 0
+  _swapCamWithArrowKeys: 1
   _rawImage: {fileID: 5118442579172507523}
+--- !u!114 &4026049620559909624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6037874268514658258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6cbaf5a7d55d74180aac478072c27b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementSpeed: 10
+  fastMovementSpeed: 100
+  freeLookSensitivity: 3
+  zoomSensitivity: 10
+  fastZoomSensitivity: 50
 --- !u!1 &6292977311477365252
 GameObject:
   m_ObjectHideFlags: 0

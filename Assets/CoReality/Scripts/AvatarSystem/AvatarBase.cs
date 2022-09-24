@@ -86,7 +86,7 @@ namespace CoReality.Avatars
             }
         }
 
-        void Update()
+        protected virtual void Update()
         {
             if (!_isInitalized) return;
 

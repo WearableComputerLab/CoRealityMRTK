@@ -238,7 +238,7 @@ namespace CoReality.Avatars
             spectator.Initalize(remote);
 
             spectator.OnPropertyChanged.AddListener((prop, val) => { _onAvatarPropertyChanged?.Invoke(spectator, prop, val); });
-
+               
             if (!remote)
             {
                 _localAvatar = spectator;
