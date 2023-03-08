@@ -2,6 +2,12 @@
   <img src="./images/logo.png" />
 </p>
 
+## Using CoReality?
+
+If you intend to use CoReality in one of your projects, please cite the original work:
+
+> J. McDade et al., "CADET: A Collaborative Agile Data Exploration Tool for Mixed Reality," 2022 IEEE International Symposium on Mixed and Augmented Reality Adjunct (ISMAR-Adjunct), Singapore, Singapore, 2022, pp. 899-900, doi: 10.1109/ISMAR-Adjunct57072.2022.00195.
+
 ## Requirements
 
 `Unity version 2019.4 LTS^`
